@@ -1,0 +1,14 @@
+[
+  {
+    "particles": [
+      {"px": 20, "py": -15, "pz": 40, "energy": 50, "type": "muon"},
+      {"px": -20, "py": 15, "pz": -40, "energy": 50, "type": "muon"}
+    ]
+  },
+  {
+    "particles": [
+      {"px": 10, "py": 5, "pz": 30, "energy": 35, "type": "electron"},
+      {"px": -10, "py": -5, "pz": -30, "energy": 35, "type": "electron"}
+    ]
+  }
+]
