@@ -1,92 +1,112 @@
-const PARTICLE_TYPES = ['muon', 'electron', 'photon', 'pion', 'kaon'];
+// script.js
 
-function generateEvent(totalEnergy) {
-  const numParticles = Math.floor(Math.random() * 3) + 2; // 2 to 4
-  const particles = [];
-  let pxTotal = 0, pyTotal = 0, pzTotal = 0;
+// Global particle data
+const particleTypes = ['Electron', 'Muon', 'Pion', 'Photon', 'Kaon', 'Proton', 'Neutrino'];
 
-  for (let i = 0; i < numParticles; i++) {
-    // Distribute momentum
-    const px = (Math.random() - 0.5) * totalEnergy / 10;
-    const py = (Math.random() - 0.5) * totalEnergy / 10;
-    const pz = (Math.random() - 0.5) * totalEnergy / 10;
-    const p2 = px**2 + py**2 + pz**2;
-    const mass = Math.random() * 0.5 + 0.1; // rest mass in GeV
-    const energy = Math.sqrt(p2 + mass**2);
+// Color map (optional, used for analytics & display)
+const particleColors = {
+  Electron: '#4ade80',
+  Muon: '#22d3ee',
+  Pion: '#facc15',
+  Photon: '#f87171',
+  Kaon: '#a78bfa',
+  Proton: '#f472b6',
+  Neutrino: '#9ca3af'
+};
 
-    pxTotal += px;
-    pyTotal += py;
-    pzTotal += pz;
+// DOM refs
+const energyInput = document.getElementById('energyInputMain');
+const generateBtn = document.getElementById('generateBtn');
+const particlesList = document.getElementById('particlesList');
+const analyticsPanel = document.getElementById('analyticsPanel');
 
-    particles.push({ px, py, pz, energy, type: randomType() });
+// Stores current generated particles
+let currentParticles = [];
+
+// Generate synthetic particles based on energy input (TeV)
+// Physics-aware: particle counts roughly scale with sqrt(energy), energies per particle random with limits
+function generateCollisionParticles(energyTeV) {
+  const nParticles = Math.floor(5 + Math.sqrt(energyTeV) * 15); // example scaling
+  let particles = [];
+
+  for (let i = 0; i < nParticles; i++) {
+    // Random particle type weighted by physics-inspired rough abundance
+    const type = weightedRandomParticle();
+
+    // Energy per particle (GeV), constrained by total collision energy
+    // Random fraction of collision energy scaled by some physics-inspired distribution
+    const particleEnergy = randomParticleEnergy(type, energyTeV);
+
+    // Generate particle object
+    particles.push({
+      id: i + 1,
+      type,
+      energy: particleEnergy,
+      momentum: generateRandomMomentum(particleEnergy),
+      eta: randRange(-3, 3),
+      phi: randRange(-Math.PI, Math.PI)
+    });
   }
 
-  return { particles, pxTotal, pyTotal, pzTotal };
+  return particles;
 }
 
-function randomType() {
-  return PARTICLE_TYPES[Math.floor(Math.random() * PARTICLE_TYPES.length)];
+// Weighted random particle type (rough LHC physics abundance)
+function weightedRandomParticle() {
+  const weights = {
+    Electron: 10,
+    Muon: 8,
+    Pion: 40,
+    Photon: 20,
+    Kaon: 12,
+    Proton: 5,
+    Neutrino: 5
+  };
+  const sum = Object.values(weights).reduce((a,b)=>a+b, 0);
+  let r = Math.random() * sum;
+  for (const [type, w] of Object.entries(weights)) {
+    if (r < w) return type;
+    r -= w;
+  }
+  return 'Pion';
 }
 
-function invariantMass(particles) {
-  const E = particles.reduce((sum, p) => sum + p.energy, 0);
-  const px = particles.reduce((sum, p) => sum + p.px, 0);
-  const py = particles.reduce((sum, p) => sum + p.py, 0);
-  const pz = particles.reduce((sum, p) => sum + p.pz, 0);
-  return Math.sqrt(Math.max(0, E**2 - px**2 - py**2 - pz**2));
+// Generate random momentum vector magnitude based on energy (simplified)
+// Here momentum ≈ energy (in GeV) ignoring mass for simplicity
+function generateRandomMomentum(energy) {
+  const p = energy; // GeV/c
+  return p;
 }
 
-function plotCharts(events) {
-  const masses = events.map(e => invariantMass(e.particles));
-  const momentumXY = events.map(e => ({ x: e.pxTotal, y: e.pyTotal }));
-
-  const ctx1 = document.getElementById('massChart').getContext('2d');
-  new Chart(ctx1, {
-    type: 'bar',
-    data: {
-      labels: masses.map((_, i) => `Event ${i + 1}`),
-      datasets: [{
-        label: 'Invariant Mass (GeV)',
-        data: masses,
-        backgroundColor: 'rgba(88,166,255,0.8)'
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-
-  const ctx2 = document.getElementById('momentumChart').getContext('2d');
-  new Chart(ctx2, {
-    type: 'scatter',
-    data: {
-      datasets: [{
-        label: 'Momentum Balance (px vs py)',
-        data: momentumXY,
-        backgroundColor: 'rgba(35,134,54,0.8)'
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { title: { display: true, text: 'px Total (GeV)' } },
-        y: { title: { display: true, text: 'py Total (GeV)' } }
-      }
-    }
-  });
+// Generate random number in range [min, max]
+function randRange(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
-document.getElementById('collisionForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const energy = parseFloat(document.getElementById('energyInput').value);
-  const count = parseInt(document.getElementById('eventCount').value);
-  const events = [];
+// Particle energy range by type and collision energy (TeV)
+// Rough example limits, e.g. electrons tend to have lower energies, photons broader
+function randomParticleEnergy(type, collisionEnergyTeV) {
+  const maxGeV = collisionEnergyTeV * 1000; // Convert TeV to GeV
+  switch(type) {
+    case 'Electron': return randRange(1, Math.min(30, maxGeV * 0.05));
+    case 'Muon': return randRange(1, Math.min(50, maxGeV * 0.1));
+    case 'Pion': return randRange(0.5, Math.min(200, maxGeV * 0.2));
+    case 'Photon': return randRange(0.1, Math.min(400, maxGeV * 0.3));
+    case 'Kaon': return randRange(0.5, Math.min(150, maxGeV * 0.15));
+    case 'Proton': return randRange(5, Math.min(500, maxGeV * 0.4));
+    case 'Neutrino': return randRange(0.01, Math.min(10, maxGeV * 0.02));
+    default: return randRange(1, Math.min(50, maxGeV * 0.1));
+  }
+}
 
-  for (let i = 0; i < count; i++) {
-    events.push(generateEvent(energy));
+// Update particles list UI
+function renderParticles(particles) {
+  if (!particles.length) {
+    particlesList.innerHTML = '<i>No particles generated.</i>';
+    return;
   }
 
-  plotCharts(events);
-});
-
+  const html = particles.map(p => {
+    return `<div class="particle" style="color:${particleColors[p.type] || '#aaa'};">
+      <strong>Particle #${p.id}</strong>:
+      ${p.type} | Energy: ${p.energy.toFixed(2)} GeV | Momentum: ${p
