@@ -3,48 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QuantumGAN - Simulated LHC Collisions</title>
+  <title>QuantumGAN Proton-Proton Collision Simulator</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="app" role="main" aria-label="QuantumGAN Proton-Proton Collision Simulator">
+  <header>
+    <h1>QuantumGAN: LHC Collision Simulator</h1>
+    <label class="theme-switch">
+      <input type="checkbox" id="themeSwitch" />
+      <span>Dark Mode</span>
+    </label>
+  </header>
 
-    <h1>QuantumGAN 🚀</h1>
-
-    <div class="theme-switch-wrapper">
-      <span>🌞 Light</span>
-      <input type="checkbox" id="themeSwitch" class="theme-switch" />
-      <label for="themeSwitch" class="theme-switch-label" aria-label="Toggle dark/light theme"></label>
-      <span>🌙 Dark</span>
-    </div>
-
-    <section id="controls" aria-label="Energy input and generation controls">
-      <label for="energyInput" class="visually-hidden">Collision Energy (TeV)</label>
-      <input
-        type="number"
-        id="energyInput"
-        min="0"
-        max="20"
-        step="0.1"
-        value="13.6"
-        aria-describedby="energyHelp"
-        aria-required="true"
-      />
-      <span id="energyHelp" class="visually-hidden">Enter collision energy in teraelectronvolts</span>
-
-      <button id="generateBtn" aria-live="polite" aria-label="Generate synthetic collision event">Simulate Collision</button>
+  <main>
+    <section class="input-panel">
+      <label for="energyInput">Collision Energy (TeV):</label>
+      <input id="energyInput" type="number" min="0.1" max="20" step="0.1" value="13.6" />
+      <button id="generateBtn">Simulate Collision</button>
     </section>
 
-    <section aria-label="Generated particles" id="particlesList" tabindex="0" aria-live="polite">
-      <!-- Particle output injected here -->
+    <section class="output-panel">
+      <h2>Generated Particles</h2>
+      <div id="particlesList" aria-live="polite"></div>
     </section>
 
-    <section aria-label="Physical plausibility analytics" id="analyticsPanel" tabindex="0">
-      <!-- Analytics output here -->
+    <section class="analytics-panel" id="analyticsPanel" aria-live="polite">
+      <!-- Analytics injected here -->
     </section>
+  </main>
 
-  </div>
+  <footer>
+    <small>© 2025 QuantumGAN by Your Name | CERN-level Physics + JS GAN Simulation</small>
+  </footer>
 
-  <script src="script.js" defer></script>
+  <!-- Core Scripts -->
+  <script src="analytics.js"></script>
+  <script src="eastereggs.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
