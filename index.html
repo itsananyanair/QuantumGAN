@@ -1,55 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>QuantumGAN - Proton Collision Simulator 40 </title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuantumGAN - Simulated LHC Collisions</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="app" role="main" aria-label="QuantumGAN Proton-Proton Collision Simulator">
 
-<header>
-  <h1>QuantumGAN — Simulating LHC Proton Collisions</h1>
-  <p>Input collision energy (TeV) & explore generated particle events</p>
-</header>
+    <h1>QuantumGAN 🚀</h1>
 
-<main>
-  <section id="input-section">
-    <label for="energyInputMain">Collision Energy (TeV):</label>
-    <input type="number" id="energyInputMain" min="0.5" max="14" step="0.1" value="7" />
-    <button id="generateBtn">Simulate Collision</button>
-  </section>
+    <div class="theme-switch-wrapper">
+      <span>🌞 Light</span>
+      <input type="checkbox" id="themeSwitch" class="theme-switch" />
+      <label for="themeSwitch" class="theme-switch-label" aria-label="Toggle dark/light theme"></label>
+      <span>🌙 Dark</span>
+    </div>
 
-  <section id="output-section">
-    <h2>Generated Particles</h2>
-    <div id="particlesList" aria-live="polite" aria-label="List of generated particles"></div>
-  </section>
+    <section id="controls" aria-label="Energy input and generation controls">
+      <label for="energyInput" class="visually-hidden">Collision Energy (TeV)</label>
+      <input
+        type="number"
+        id="energyInput"
+        min="0"
+        max="20"
+        step="0.1"
+        value="13.6"
+        aria-describedby="energyHelp"
+        aria-required="true"
+      />
+      <span id="energyHelp" class="visually-hidden">Enter collision energy in teraelectronvolts</span>
 
-  <section id="analytics-section">
-    <h2>Event Analytics</h2>
-    <div id="analyticsPanel"></div>
-  </section>
+      <button id="generateBtn" aria-live="polite" aria-label="Generate synthetic collision event">Simulate Collision</button>
+    </section>
 
-  <section id="detector-section">
-    <button id="openDetectorBtn">Open Faux CMS Detector</button>
-  </section>
-</main>
+    <section aria-label="Generated particles" id="particlesList" tabindex="0" aria-live="polite">
+      <!-- Particle output injected here -->
+    </section>
 
-<footer>
-  <small>© 2025 QuantumGAN by CERN-Physics AI Hybrid</small>
-</footer>
+    <section aria-label="Physical plausibility analytics" id="analyticsPanel" tabindex="0">
+      <!-- Analytics output here -->
+    </section>
 
-<!-- Modal for detector animation -->
-<div id="detectorModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="CMS Detector Animation">
-  <div class="modal-content">
-    <button id="closeDetectorBtn" aria-label="Close Detector Animation">&times;</button>
-    <iframe src="detector.html" title="Faux CMS Detector Animation" frameborder="0" width="100%" height="600"></iframe>
   </div>
-</div>
 
-<script src="eastereggs.js"></script>
-<script src="analytics.js"></script>
-<script src="script.js"></script>
-
+  <script src="script.js" defer></script>
 </body>
 </html>
