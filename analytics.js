@@ -1,45 +1,57 @@
 
-const ParticleAnalytics = (() => {
-  let stats = {
-    total: 0,
-    types: {},
-    maxEnergy: 0,
-    histogram: []
-  };
+// analytics.js
 
-  function logParticle(particle) {
-    stats.total++;
-    const type = particle.type;
-    const e = particle.energy || 0;
-    if (!stats.types[type]) stats.types[type] = 0;
-    stats.types[type]++;
-    if (e > stats.maxEnergy) stats.maxEnergy = e;
-    stats.histogram.push(e);
-    updateDashboard();
-  }
+// Constants reused in multiple files - physics data
+const PARTICLE_MASSES = {
+  photon: 0,
+  electron: 0.000511,
+  muon: 0.1057,
+  pion: 0.1396,
+  kaon: 0.4937,
+  proton: 0.9383,
+  neutron: 0.9396,
+  jet: 0.5
+};
 
-  function updateDashboard() {
-    const panel = document.getElementById('analytics-panel');
-    if (!panel) return;
+// Compute invariant mass (GeV/c²)
+export function computeInvariantMass(particles) {
+  let E = 0, px = 0, py = 0, pz = 0;
+  particles.forEach(({energy, momentum, eta, phi}) => {
+    const e = parseFloat(energy);
+    const p = parseFloat(momentum);
+    const et = parseFloat(eta);
+    const ph = parseFloat(phi);
 
-    panel.innerHTML = `
-      <h3>📊 Analytics</h3>
-      <p><strong>Total Particles:</strong> ${stats.total}</p>
-      <p><strong>Max Energy:</strong> ${stats.maxEnergy.toFixed(2)} GeV</p>
-      <ul>
-        ${Object.entries(stats.types).map(([type, count]) => `<li>${type}: ${count}</li>`).join('')}
-      </ul>
-    `;
-  }
+    E += e;
+    px += p * Math.cos(ph);
+    py += p * Math.sin(ph);
+    pz += p * Math.sinh(et);
+  });
 
-  function reset() {
-    stats = { total: 0, types: {}, maxEnergy: 0, histogram: [] };
-    updateDashboard();
-  }
+  const mSq = E*E - (px*px + py*py + pz*pz);
+  return mSq > 0 ? Math.sqrt(mSq).toFixed(3) : 'NaN';
+}
 
-  return {
-    logParticle,
-    reset,
-    getStats: () => stats
-  };
-})();
+// Check total momentum residual (ideally near zero)
+export function checkMomentumConservation(particles) {
+  let px = 0, py = 0, pz = 0;
+  particles.forEach(({momentum, eta, phi}) => {
+    const p = parseFloat(momentum);
+    const et = parseFloat(eta);
+    const ph = parseFloat(phi);
+    px += p * Math.cos(ph);
+    py += p * Math.sin(ph);
+    pz += p * Math.sinh(et);
+  });
+
+  return Math.sqrt(px*px + py*py + pz*pz).toFixed(3);
+}
+
+// Summarize particle type distribution
+export function particleTypeDistribution(particles) {
+  const counts = {};
+  particles.forEach(p => {
+    counts[p.type] = (counts[p.type] || 0) + 1;
+  });
+  return counts;
+}
