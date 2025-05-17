@@ -1,57 +1,65 @@
 
 // analytics.js
 
-// Constants reused in multiple files - physics data
-const PARTICLE_MASSES = {
-  photon: 0,
-  electron: 0.000511,
-  muon: 0.1057,
-  pion: 0.1396,
-  kaon: 0.4937,
-  proton: 0.9383,
-  neutron: 0.9396,
-  jet: 0.5
-};
-
-// Compute invariant mass (GeV/c²)
+/**
+ * Compute total invariant mass of all particles in the event.
+ * Formula: M² = (ΣE)² - (Σpₓ)² - (Σpᵧ)² - (Σp_z)²
+ * Returns invariant mass in GeV/c².
+ */
 export function computeInvariantMass(particles) {
-  let E = 0, px = 0, py = 0, pz = 0;
-  particles.forEach(({energy, momentum, eta, phi}) => {
-    const e = parseFloat(energy);
-    const p = parseFloat(momentum);
-    const et = parseFloat(eta);
-    const ph = parseFloat(phi);
+  let totalE = 0;
+  let totalPx = 0;
+  let totalPy = 0;
+  let totalPz = 0;
 
-    E += e;
-    px += p * Math.cos(ph);
-    py += p * Math.sin(ph);
-    pz += p * Math.sinh(et);
-  });
-
-  const mSq = E*E - (px*px + py*py + pz*pz);
-  return mSq > 0 ? Math.sqrt(mSq).toFixed(3) : 'NaN';
-}
-
-// Check total momentum residual (ideally near zero)
-export function checkMomentumConservation(particles) {
-  let px = 0, py = 0, pz = 0;
-  particles.forEach(({momentum, eta, phi}) => {
-    const p = parseFloat(momentum);
-    const et = parseFloat(eta);
-    const ph = parseFloat(phi);
-    px += p * Math.cos(ph);
-    py += p * Math.sin(ph);
-    pz += p * Math.sinh(et);
-  });
-
-  return Math.sqrt(px*px + py*py + pz*pz).toFixed(3);
-}
-
-// Summarize particle type distribution
-export function particleTypeDistribution(particles) {
-  const counts = {};
   particles.forEach(p => {
-    counts[p.type] = (counts[p.type] || 0) + 1;
+    const px = p.momentum * Math.cos(p.phi);
+    const py = p.momentum * Math.sin(p.phi);
+    const pz = p.momentum * Math.sinh(p.eta); // pseudorapidity approximation
+
+    totalE += p.energy;
+    totalPx += px;
+    totalPy += py;
+    totalPz += pz;
   });
-  return counts;
+
+  const invariantMassSquared =
+    totalE ** 2 - totalPx ** 2 - totalPy ** 2 - totalPz ** 2;
+
+  return invariantMassSquared >= 0
+    ? Math.sqrt(invariantMassSquared).toFixed(3)
+    : 'Non-physical';
+}
+
+/**
+ * Check total momentum vector residual.
+ * Useful for approximating conservation of momentum.
+ * Returns residual in GeV/c.
+ */
+export function checkMomentumConservation(particles) {
+  let totalPx = 0;
+  let totalPy = 0;
+  let totalPz = 0;
+
+  particles.forEach(p => {
+    totalPx += p.momentum * Math.cos(p.phi);
+    totalPy += p.momentum * Math.sin(p.phi);
+    totalPz += p.momentum * Math.sinh(p.eta);
+  });
+
+  const residual = Math.sqrt(totalPx ** 2 + totalPy ** 2 + totalPz ** 2);
+  return residual.toFixed(3);
+}
+
+/**
+ * Count and return number of particles by type.
+ * Returns object: { e⁻: 2, μ⁺: 1, γ: 3, ... }
+ */
+export function particleTypeDistribution(particles) {
+  const dist = {};
+  particles.forEach(p => {
+    if (!dist[p.type]) dist[p.type] = 0;
+    dist[p.type]++;
+  });
+  return dist;
 }
