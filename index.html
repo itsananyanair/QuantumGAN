@@ -2,43 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QuantumGAN Proton-Proton Collision Simulator</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantumGAN Collider Simulator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>QuantumGAN: LHC Collision Simulator</h1>
-    <label class="theme-switch">
-      <input type="checkbox" id="themeSwitch" />
-      <span>Dark Mode</span>
-    </label>
-  </header>
+  <div class="container">
+    <h1>💥 QuantumGAN: Proton-Proton Collision Simulator</h1>
+    
+    <form id="collisionForm">
+      <label for="energyInput">Total Collision Energy (GeV):</label>
+      <input type="number" id="energyInput" min="100" max="14000" step="10" required value="13000" />
 
-  <main>
-    <section class="input-panel">
-      <label for="energyInput">Collision Energy (TeV):</label>
-      <input id="energyInput" type="number" min="0.1" max="20" step="0.1" value="13.6" />
-      <button id="generateBtn">Simulate Collision</button>
-    </section>
+      <label for="eventCount">Number of Events:</label>
+      <input type="number" id="eventCount" min="1" max="1000" value="100" />
 
-    <section class="output-panel">
-      <h2>Generated Particles</h2>
-      <div id="particlesList" aria-live="polite"></div>
-    </section>
+      <button type="submit">Simulate Events</button>
+    </form>
 
-    <section class="analytics-panel" id="analyticsPanel" aria-live="polite">
-      <!-- Analytics injected here -->
-    </section>
-  </main>
+    <div id="results">
+      <canvas id="massChart"></canvas>
+      <canvas id="momentumChart"></canvas>
+    </div>
+  </div>
 
-  <footer>
-    <small>© 2025 QuantumGAN by Your Name | CERN-level Physics + JS GAN Simulation</small>
-  </footer>
-
-  <!-- Core Scripts -->
-  <script src="analytics.js"></script>
-  <script src="eastereggs.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
