@@ -89,4 +89,3 @@ document.getElementById('collisionForm').addEventListener('submit', function(e) 
 
   plotCharts(events);
 });
-
