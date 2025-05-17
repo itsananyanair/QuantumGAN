@@ -1,112 +1,186 @@
-// script.js
+// Theme toggle persistence
+const themeSwitch = document.getElementById('themeSwitch');
 
-// Global particle data
-const particleTypes = ['Electron', 'Muon', 'Pion', 'Photon', 'Kaon', 'Proton', 'Neutrino'];
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeSwitch.checked = true;
+}
 
-// Color map (optional, used for analytics & display)
-const particleColors = {
-  Electron: '#4ade80',
-  Muon: '#22d3ee',
-  Pion: '#facc15',
-  Photon: '#f87171',
-  Kaon: '#a78bfa',
-  Proton: '#f472b6',
-  Neutrino: '#9ca3af'
-};
+themeSwitch.addEventListener('change', () => {
+  if (themeSwitch.checked) {
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+});
 
-// DOM refs
-const energyInput = document.getElementById('energyInputMain');
+// DOM Elements
+const energyInput = document.getElementById('energyInput');
 const generateBtn = document.getElementById('generateBtn');
 const particlesList = document.getElementById('particlesList');
 const analyticsPanel = document.getElementById('analyticsPanel');
 
-// Stores current generated particles
-let currentParticles = [];
+// Physics & GAN Simulation Constants
+const PARTICLE_TYPES = ['photon', 'electron', 'muon', 'pion', 'kaon', 'proton', 'neutron', 'jet'];
+const PARTICLE_MASSES = {
+  photon: 0,
+  electron: 0.000511, // GeV/c²
+  muon: 0.1057,
+  pion: 0.1396,
+  kaon: 0.4937,
+  proton: 0.9383,
+  neutron: 0.9396,
+  jet: 0.5 // approx, jet is a shower of particles so simplified
+};
 
-// Generate synthetic particles based on energy input (TeV)
-// Physics-aware: particle counts roughly scale with sqrt(energy), energies per particle random with limits
-function generateCollisionParticles(energyTeV) {
-  const nParticles = Math.floor(5 + Math.sqrt(energyTeV) * 15); // example scaling
-  let particles = [];
-
-  for (let i = 0; i < nParticles; i++) {
-    // Random particle type weighted by physics-inspired rough abundance
-    const type = weightedRandomParticle();
-
-    // Energy per particle (GeV), constrained by total collision energy
-    // Random fraction of collision energy scaled by some physics-inspired distribution
-    const particleEnergy = randomParticleEnergy(type, energyTeV);
-
-    // Generate particle object
-    particles.push({
-      id: i + 1,
-      type,
-      energy: particleEnergy,
-      momentum: generateRandomMomentum(particleEnergy),
-      eta: randRange(-3, 3),
-      phi: randRange(-Math.PI, Math.PI)
-    });
-  }
-
-  return particles;
-}
-
-// Weighted random particle type (rough LHC physics abundance)
-function weightedRandomParticle() {
-  const weights = {
-    Electron: 10,
-    Muon: 8,
-    Pion: 40,
-    Photon: 20,
-    Kaon: 12,
-    Proton: 5,
-    Neutrino: 5
-  };
-  const sum = Object.values(weights).reduce((a,b)=>a+b, 0);
-  let r = Math.random() * sum;
-  for (const [type, w] of Object.entries(weights)) {
-    if (r < w) return type;
-    r -= w;
-  }
-  return 'Pion';
-}
-
-// Generate random momentum vector magnitude based on energy (simplified)
-// Here momentum ≈ energy (in GeV) ignoring mass for simplicity
-function generateRandomMomentum(energy) {
-  const p = energy; // GeV/c
-  return p;
-}
-
-// Generate random number in range [min, max]
-function randRange(min, max) {
+// Utility to generate random float between min and max
+function randomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-// Particle energy range by type and collision energy (TeV)
-// Rough example limits, e.g. electrons tend to have lower energies, photons broader
-function randomParticleEnergy(type, collisionEnergyTeV) {
-  const maxGeV = collisionEnergyTeV * 1000; // Convert TeV to GeV
-  switch(type) {
-    case 'Electron': return randRange(1, Math.min(30, maxGeV * 0.05));
-    case 'Muon': return randRange(1, Math.min(50, maxGeV * 0.1));
-    case 'Pion': return randRange(0.5, Math.min(200, maxGeV * 0.2));
-    case 'Photon': return randRange(0.1, Math.min(400, maxGeV * 0.3));
-    case 'Kaon': return randRange(0.5, Math.min(150, maxGeV * 0.15));
-    case 'Proton': return randRange(5, Math.min(500, maxGeV * 0.4));
-    case 'Neutrino': return randRange(0.01, Math.min(10, maxGeV * 0.02));
-    default: return randRange(1, Math.min(50, maxGeV * 0.1));
+// Generate a synthetic particle for a given collision energy
+function generateParticle(energy) {
+  // Weighted random choice for particle type (simplified physics plausibility)
+  const weights = [0.25, 0.15, 0.10, 0.15, 0.10, 0.10, 0.05, 0.10];
+  let cumulative = 0;
+  const rnd = Math.random();
+  let type = 'photon';
+
+  for (let i = 0; i < PARTICLE_TYPES.length; i++) {
+    cumulative += weights[i];
+    if (rnd <= cumulative) {
+      type = PARTICLE_TYPES[i];
+      break;
+    }
   }
+
+  // Energy fraction this particle carries (simplified)
+  const energyFraction = randomFloat(0.05, 0.4);
+  const particleEnergy = energy * energyFraction;
+
+  // Relativistic momentum magnitude approximation (p = sqrt(E^2 - m^2))
+  const mass = PARTICLE_MASSES[type];
+  const momentumMag = Math.sqrt(particleEnergy * particleEnergy - mass * mass);
+
+  // Random direction: pseudorapidity (eta), azimuthal angle (phi)
+  const eta = randomFloat(-2.5, 2.5);
+  const phi = randomFloat(-Math.PI, Math.PI);
+
+  return {
+    type,
+    energy: particleEnergy.toFixed(3),
+    mass: mass,
+    momentum: momentumMag.toFixed(3),
+    eta: eta.toFixed(3),
+    phi: phi.toFixed(3)
+  };
 }
 
-// Update particles list UI
+// Generate synthetic collision event: array of particles
+function generateCollisionEvent(energy) {
+  // Number of particles increases with energy (simplified)
+  const numParticles = Math.floor(randomFloat(5, 15));
+
+  const particles = [];
+  for (let i = 0; i < numParticles; i++) {
+    particles.push(generateParticle(energy));
+  }
+  return particles;
+}
+
+// Compute invariant mass of particle system (simplified)
+function computeInvariantMass(particles) {
+  let E_total = 0;
+  let px_total = 0;
+  let py_total = 0;
+  let pz_total = 0;
+
+  particles.forEach(({ energy, momentum, eta, phi }) => {
+    const E = parseFloat(energy);
+    const p = parseFloat(momentum);
+    const etaF = parseFloat(eta);
+    const phiF = parseFloat(phi);
+
+    // Convert spherical coordinates to Cartesian momenta
+    const px = p * Math.cos(phiF);
+    const py = p * Math.sin(phiF);
+    const pz = p * Math.sinh(etaF); // pseudorapidity to pz
+
+    E_total += E;
+    px_total += px;
+    py_total += py;
+    pz_total += pz;
+  });
+
+  const massSquared = E_total * E_total - (px_total * px_total + py_total * py_total + pz_total * pz_total);
+  return massSquared > 0 ? Math.sqrt(massSquared).toFixed(3) : 'NaN';
+}
+
+// Check momentum conservation by vector sum of momenta (should be near zero)
+function checkMomentumConservation(particles) {
+  let px_total = 0;
+  let py_total = 0;
+  let pz_total = 0;
+
+  particles.forEach(({ momentum, eta, phi }) => {
+    const p = parseFloat(momentum);
+    const etaF = parseFloat(eta);
+    const phiF = parseFloat(phi);
+
+    const px = p * Math.cos(phiF);
+    const py = p * Math.sin(phiF);
+    const pz = p * Math.sinh(etaF);
+
+    px_total += px;
+    py_total += py;
+    pz_total += pz;
+  });
+
+  const residual = Math.sqrt(px_total * px_total + py_total * py_total + pz_total * pz_total);
+  return residual.toFixed(3);
+}
+
+// Animate particle insertion (CSS handles actual animation)
+function animateParticleInsertion(element) {
+  element.classList.add('particle-item');
+}
+
+// Render particles in the list
 function renderParticles(particles) {
-  if (!particles.length) {
-    particlesList.innerHTML = '<i>No particles generated.</i>';
+  particlesList.innerHTML = '';
+  particles.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.textContent = `#${i + 1} | ${p.type.toUpperCase()} | E: ${p.energy} GeV | p: ${p.momentum} GeV/c | η: ${p.eta} | φ: ${p.phi}`;
+    animateParticleInsertion(div);
+    particlesList.appendChild(div);
+  });
+}
+
+// Render analytics panel with physical checks
+function renderAnalytics(particles) {
+  const invariantMass = computeInvariantMass(particles);
+  const momentumResidual = checkMomentumConservation(particles);
+
+  analyticsPanel.textContent =
+    `📊 Physical Plausibility Analysis\n\n` +
+    `- Number of particles: ${particles.length}\n` +
+    `- Invariant mass (GeV/c²): ${invariantMass}\n` +
+    `- Total momentum residual (should ~0): ${momentumResidual} GeV/c\n\n` +
+    `*Note: Residual momentum close to zero indicates approximate conservation.\n` +
+    `Particles generated with simplified relativistic assumptions.`;
+}
+
+// Event listener for simulate button
+generateBtn.addEventListener('click', () => {
+  const energy = parseFloat(energyInput.value);
+  if (isNaN(energy) || energy <= 0 || energy > 20) {
+    alert('Please enter a valid collision energy between 0 and 20 TeV');
     return;
   }
 
-  const html = particles.map(p => {
-    return `<div class="particle" style="color:${particleColors[p.type] || '#aaa'};">
-      <strong>Particle #${p.id}</strong>:
-      ${p.type} | Energy: ${p.energy.toFixed(2)} GeV | Momentum: ${p
+  const particles = generateCollisionEvent(energy);
+  renderParticles(particles);
+  renderAnalytics(particles);
+});
