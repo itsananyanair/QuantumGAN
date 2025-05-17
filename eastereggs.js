@@ -1,4 +1,3 @@
-
 // eastereggs.js — Secret Features for Nerds
 // Handles hidden surprises, key triggers, and particle anomalies
 
@@ -40,7 +39,7 @@ const EasterEggs = (() => {
 
   function triggerRareEvent() {
     if (Math.random() < 0.01) { // 1% chance
-      alert("🧨 Rare Higgs-like event detected!");
+      alert("🚨 Rare Higgs-like event detected!");
     }
   }
 
@@ -48,4 +47,3 @@ const EasterEggs = (() => {
     triggerRareEvent
   };
 })();
-
