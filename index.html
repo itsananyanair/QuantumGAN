@@ -2,36 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QuantumGAN — LHC Event Simulator</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantumGAN Collider Simulator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>⚛ QuantumGAN</h1>
-    <p>Simulating LHC proton-proton collisions using GAN-inspired logic and physics validation.</p>
-  </header>
+  <div class="container">
+    <h1>💥 QuantumGAN: Proton-Proton Collision Simulator</h1>
+    
+    <form id="collisionForm">
+      <label for="energyInput">Total Collision Energy (GeV):</label>
+      <input type="number" id="energyInput" min="100" max="14000" step="10" required value="13000" />
 
-  <section id="upload-section">
-    <input type="file" id="file-input" accept=".json" />
-    <button id="simulate-btn">Simulate Events</button>
-  </section>
+      <label for="eventCount">Number of Events:</label>
+      <input type="number" id="eventCount" min="1" max="1000" value="100" />
 
-  <section id="plot-section">
-    <div>
-      <canvas id="invariantMassChart"></canvas>
-    </div>
-    <div>
+      <button type="submit">Simulate Events</button>
+    </form>
+
+    <div id="results">
+      <canvas id="massChart"></canvas>
       <canvas id="momentumChart"></canvas>
     </div>
-  </section>
-
-  <footer>
-    <p>Made with 💡 at the intersection of physics + AI.</p>
-  </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="utils.js"></script>
-  <script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
+
