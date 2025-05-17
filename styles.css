@@ -1,113 +1,63 @@
-/* Base */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0; padding: 0;
-  background: #f0f0f0;
-  color: #222;
-  transition: background 0.3s, color 0.3s;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+  margin: 0;
+  padding: 20px;
 }
 
-header, footer {
-  background: #222;
-  color: #eee;
-  padding: 1rem;
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
+h1 {
   text-align: center;
+  margin-bottom: 30px;
+  color: #58a6ff;
 }
 
-header h1 {
-  margin: 0 0 0.5rem;
-}
-
-.theme-switch {
-  cursor: pointer;
-  user-select: none;
-}
-
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
-
-.input-panel,
-.output-panel,
-.analytics-panel {
-  background: white;
-  margin-bottom: 2rem;
-  padding: 1rem 1.5rem;
+form {
+  background: #161b22;
+  padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(88,166,255,0.2);
 }
 
-input[type="number"] {
-  width: 6rem;
-  padding: 0.3rem;
-  font-size: 1rem;
-  margin-left: 0.5rem;
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 6px;
 }
 
 button {
-  margin-left: 1rem;
-  padding: 0.4rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 6px;
-  border: none;
-  background: #007bff;
+  margin-top: 20px;
+  background-color: #238636;
   color: white;
-  transition: background 0.2s ease;
-}
-button:hover {
-  background: #0056b3;
-}
-
-#particlesList > div {
-  margin: 0.3rem 0;
-  padding: 0.3rem 0.6rem;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  font-weight: bold;
   border-radius: 6px;
-  background: #f9f9f9;
-  animation: fadeSlideIn 0.7s ease forwards;
+  cursor: pointer;
 }
 
-/* Particle animation */
-@keyframes fadeSlideIn {
-  from {opacity: 0; transform: translateX(-20px);}
-  to {opacity: 1; transform: translateX(0);}
+#results {
+  margin-top: 40px;
 }
 
-/* Dark theme */
-body.dark {
-  background: #121212;
-  color: #ddd;
-}
-
-body.dark header,
-body.dark footer {
-  background: #000;
-  color: #ccc;
-}
-
-body.dark .input-panel,
-body.dark .output-panel,
-body.dark .analytics-panel {
-  background: #1c1c1c;
-  box-shadow: 0 4px 8px rgba(255,255,255,0.1);
-}
-
-body.dark #particlesList > div {
-  background: #222;
-}
-
-@media (max-width: 600px) {
-  main {
-    margin: 1rem;
-  }
-  button, input[type="number"] {
-    width: 100%;
-    margin: 0.5rem 0 0 0;
-  }
-  .input-panel {
-    display: flex;
-    flex-direction: column;
-  }
+canvas {
+  margin-top: 30px;
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
 }
