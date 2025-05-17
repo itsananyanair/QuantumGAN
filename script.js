@@ -1,96 +1,92 @@
-import { computeInvariantMass, checkMomentumConservation, particleTypeDistribution } from './analytics.js';
+const PARTICLE_TYPES = ['muon', 'electron', 'photon', 'pion', 'kaon'];
 
-// HTML element references
-const energyInput = document.getElementById('energy');
-const generateBtn = document.getElementById('generate');
-const particlesList = document.getElementById('particles-list');
-const analyticsPanel = document.getElementById('analytics');
-
-// Constants
-const PARTICLE_TYPES = ['e⁻', 'e⁺', 'μ⁻', 'μ⁺', 'π⁻', 'π⁺', 'K⁻', 'K⁺', 'γ', 'ν'];
-const PARTICLE_MASSES = {
-  'e⁻': 0.000511, 'e⁺': 0.000511,
-  'μ⁻': 0.105, 'μ⁺': 0.105,
-  'π⁻': 0.140, 'π⁺': 0.140,
-  'K⁻': 0.494, 'K⁺': 0.494,
-  'γ': 0.0, 'ν': 0.0
-};
-
-// Utility functions
-function randomFloat(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-function randomChoice(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateParticle(energy) {
-  const type = randomChoice(PARTICLE_TYPES);
-  const mass = PARTICLE_MASSES[type];
-
-  // Energy (between mass and a fraction of collision energy)
-  const e = Math.max(energy * randomFloat(0.1, 0.8), mass);
-  const p = Math.sqrt(e * e - mass * mass);
-
-  const phi = randomFloat(0, 2 * Math.PI); // azimuthal angle
-  const eta = randomFloat(-3, 3);          // pseudorapidity
-
-  return {
-    type,
-    energy: parseFloat(e.toFixed(3)),
-    momentum: parseFloat(p.toFixed(3)),
-    mass: parseFloat(mass.toFixed(3)),
-    phi,
-    eta
-  };
-}
-
-function generateEvent(energyTeV, count = 10) {
-  const energyGeV = energyTeV * 1000;
+function generateEvent(totalEnergy) {
+  const numParticles = Math.floor(Math.random() * 3) + 2; // 2 to 4
   const particles = [];
-  for (let i = 0; i < count; i++) {
-    particles.push(generateParticle(energyGeV));
+  let pxTotal = 0, pyTotal = 0, pzTotal = 0;
+
+  for (let i = 0; i < numParticles; i++) {
+    // Distribute momentum
+    const px = (Math.random() - 0.5) * totalEnergy / 10;
+    const py = (Math.random() - 0.5) * totalEnergy / 10;
+    const pz = (Math.random() - 0.5) * totalEnergy / 10;
+    const p2 = px**2 + py**2 + pz**2;
+    const mass = Math.random() * 0.5 + 0.1; // rest mass in GeV
+    const energy = Math.sqrt(p2 + mass**2);
+
+    pxTotal += px;
+    pyTotal += py;
+    pzTotal += pz;
+
+    particles.push({ px, py, pz, energy, type: randomType() });
   }
-  return particles;
+
+  return { particles, pxTotal, pyTotal, pzTotal };
 }
 
-function renderParticles(particles) {
-  particlesList.innerHTML = '';
-  particles.forEach(p => {
-    const div = document.createElement('div');
-    div.textContent = `${p.type} | Energy: ${p.energy} GeV | Momentum: ${p.momentum} GeV/c | Mass: ${p.mass} GeV/c²`;
-    particlesList.appendChild(div);
+function randomType() {
+  return PARTICLE_TYPES[Math.floor(Math.random() * PARTICLE_TYPES.length)];
+}
+
+function invariantMass(particles) {
+  const E = particles.reduce((sum, p) => sum + p.energy, 0);
+  const px = particles.reduce((sum, p) => sum + p.px, 0);
+  const py = particles.reduce((sum, p) => sum + p.py, 0);
+  const pz = particles.reduce((sum, p) => sum + p.pz, 0);
+  return Math.sqrt(Math.max(0, E**2 - px**2 - py**2 - pz**2));
+}
+
+function plotCharts(events) {
+  const masses = events.map(e => invariantMass(e.particles));
+  const momentumXY = events.map(e => ({ x: e.pxTotal, y: e.pyTotal }));
+
+  const ctx1 = document.getElementById('massChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: masses.map((_, i) => `Event ${i + 1}`),
+      datasets: [{
+        label: 'Invariant Mass (GeV)',
+        data: masses,
+        backgroundColor: 'rgba(88,166,255,0.8)'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const ctx2 = document.getElementById('momentumChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Momentum Balance (px vs py)',
+        data: momentumXY,
+        backgroundColor: 'rgba(35,134,54,0.8)'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'px Total (GeV)' } },
+        y: { title: { display: true, text: 'py Total (GeV)' } }
+      }
+    }
   });
 }
 
-function renderAnalytics(particles) {
-  const invariantMass = computeInvariantMass(particles);
-  const momentumResidual = checkMomentumConservation(particles);
-  const distribution = particleTypeDistribution(particles);
+document.getElementById('collisionForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const energy = parseFloat(document.getElementById('energyInput').value);
+  const count = parseInt(document.getElementById('eventCount').value);
+  const events = [];
 
-  let distStr = '';
-  for (const [type, count] of Object.entries(distribution)) {
-    distStr += `${type}: ${count}  `;
+  for (let i = 0; i < count; i++) {
+    events.push(generateEvent(energy));
   }
 
-  analyticsPanel.innerHTML = `
-    <h3>Collision Analytics</h3>
-    <p><strong>Invariant Mass:</strong> ${invariantMass} GeV/c²</p>
-    <p><strong>Momentum Residual:</strong> ${momentumResidual} GeV/c</p>
-    <p><strong>Particle Distribution:</strong> ${distStr}</p>
-  `;
-}
-
-// Generate button handler
-generateBtn.addEventListener('click', () => {
-  const energy = parseFloat(energyInput.value);
-  if (isNaN(energy) || energy < 0.1 || energy > 20) {
-    alert('Please enter a collision energy between 0.1 and 20 TeV');
-    return;
-  }
-  const particles = generateEvent(energy, 15);
-  renderParticles(particles);
-  renderAnalytics(particles);
+  plotCharts(events);
 });
 
