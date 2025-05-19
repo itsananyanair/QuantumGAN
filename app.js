@@ -1,55 +1,34 @@
-// app.js — Entry point for QuantumGAN UI logic and interactions
+// app.js
 
-// Wait until DOM is fully loaded before initializing
-document.addEventListener('DOMContentLoaded', () => {
-  const runBtn = document.getElementById('run-simulation');
-  const uploadInput = document.getElementById('upload-data');
-  const statusBox = document.getElementById('status-box');
-
-  runBtn.addEventListener('click', () => {
-    statusBox.innerText = '🧠 Simulating proton-proton collisions...';
-    runGANSimulation();
-    statusBox.innerText = '✅ Simulation complete. See results below.';
+document.addEventListener("DOMContentLoaded", () => {
+  const sliders = ["numParticles", "energyMin", "energyMax", "momentumSpread"];
+  sliders.forEach(id => {
+    const slider = document.getElementById(id);
+    const label = document.getElementById(id + "Value");
+    slider.addEventListener("input", () => {
+      label.textContent = slider.value;
+    });
   });
 
-  uploadInput.addEventListener('change', handleFileUpload);
+  document.getElementById("generateBtn").addEventListener("click", async () => {
+    const params = {
+      numParticles: +document.getElementById("numParticles").value,
+      energyMin: +document.getElementById("energyMin").value,
+      energyMax: +document.getElementById("energyMax").value,
+      momentumSpread: +document.getElementById("momentumSpread").value,
+    };
+
+    const particles = await runGanModel(params);
+    displayParticles(particles);
+  });
 });
 
-// Handle CSV file uploads to mimic real/synthetic CMS-like data
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+// Display generated particles in output panel
+function displayParticles(particles) {
+  const div = document.getElementById("gan-output");
+  const preview = particles.slice(0, 10).map((p, i) =>
+    `#${i + 1}: ${p.type} | E=${p.energy.toFixed(2)} GeV | p=(${p.px.toFixed(2)}, ${p.py.toFixed(2)}, ${p.pz.toFixed(2)})`
+  ).join('\n');
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const text = e.target.result;
-    const parsedParticles = parseCSVToParticles(text);
-
-    const div = document.getElementById('real-data-output');
-    div.innerHTML = `
-      <h3>📂 Uploaded Dataset (${parsedParticles.length} particles)</h3>
-      <pre>${JSON.stringify(parsedParticles.slice(0, 5), null, 2)}\n...more</pre>
-    `;
-  };
-}
-
-// CSV Parser — expected format: px,py,pz,energy,type
-function parseCSVToParticles(csvText) {
-  const lines = csvText.trim().split('\n');
-  const particles = [];
-
-  for (const line of lines) {
-    const [px, py, pz, energy, type] = line.split(',').map(v => v.trim());
-
-    const particle = createParticle(
-      parseFloat(px),
-      parseFloat(py),
-      parseFloat(pz),
-      parseFloat(energy),
-      type || 'csv'
-    );
-    particles.push(particle);
-  }
-
-  return particles;
+  div.textContent = `🎉 Generated Particles (${particles.length} total):\n\n${preview}\n\n...and more`;
 }
