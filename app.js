@@ -1,51 +1,34 @@
-// app.js
-import { initCanvas, visualizeEvent } from './visualize.js';
-import { generateParticlesForEvent } from './particles.js';
+import { initCanvas, visualizeEvent } from "./visualize.js";
+import { generateParticlesForEvent } from "./particles.js";
 
-let currentEventType = 'higgs';
-let showJets = true;
-let showMuons = true;
-let showPhotons = true;
-let showElectrons = true;
+let currentParticles = [];
+let visibleTypes = {
+  jet: true,
+  muon: true,
+  photon: true,
+  electron: true,
+};
 
-function initApp() {
-  initCanvas();
-  setupUI();
-  triggerEvent(currentEventType);
+function updateParticles() {
+  const eventType = document.getElementById("event-select").value;
+  currentParticles = generateParticlesForEvent(eventType);
+  draw();
 }
 
-function setupUI() {
-  document.getElementById('event-select').addEventListener('change', (e) => {
-    currentEventType = e.target.value;
-    triggerEvent(currentEventType);
-  });
-
-  document.querySelectorAll('input[type=checkbox]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      showJets = document.getElementById('show-jets').checked;
-      showMuons = document.getElementById('show-muons').checked;
-      showPhotons = document.getElementById('show-photons').checked;
-      showElectrons = document.getElementById('show-electrons').checked;
-      triggerEvent(currentEventType);
-    });
-  });
-
-  document.getElementById('regenerate').addEventListener('click', () => {
-    triggerEvent(currentEventType);
-  });
-}
-
-function triggerEvent(type) {
-  const allParticles = generateParticlesForEvent(type);
-  const filtered = allParticles.filter(p => {
-    if (p.type === 'jet' && !showJets) return false;
-    if (p.type === 'muon' && !showMuons) return false;
-    if (p.type === 'photon' && !showPhotons) return false;
-    if (p.type === 'electron' && !showElectrons) return false;
-    return true;
-  });
+function draw() {
+  const filtered = currentParticles.filter(p => visibleTypes[p.type]);
   visualizeEvent(filtered);
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+document.getElementById("regenerate").addEventListener("click", updateParticles);
+["jet", "muon", "photon", "electron"].forEach(type => {
+  document.getElementById(`show-${type}s`).addEventListener("change", e => {
+    visibleTypes[type] = e.target.checked;
+    draw();
+  });
+});
 
+window.addEventListener("load", () => {
+  initCanvas();
+  updateParticles();
+});
