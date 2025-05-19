@@ -8,6 +8,7 @@ function initCanvas() {
   ctx = canvas.getContext('2d');
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
+  console.log('Canvas initialized:', canvas.width, canvas.height);
 }
 
 function resizeCanvas() {
