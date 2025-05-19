@@ -1,36 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LHC QuantumGAN Simulator</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>🌀 LHC QuantumGAN Simulator</h1>
 
   <div id="controls">
-    <label for="event-select">Select Event:</label>
     <select id="event-select">
       <option value="higgs">Higgs-like</option>
       <option value="drell-yan">Drell-Yan</option>
       <option value="qcd">QCD Multijet</option>
     </select>
-
-    <div id="toggles">
-      <label><input type="checkbox" id="show-jets" checked> Show Jets</label>
-      <label><input type="checkbox" id="show-muons" checked> Show Muons</label>
-      <label><input type="checkbox" id="show-photons" checked> Show Photons</label>
-      <label><input type="checkbox" id="show-electrons" checked> Show Electrons</label>
-    </div>
-
-    <button id="regenerate">🔄 Regenerate Event</button>
+    <label><input type="checkbox" id="show-jets" checked /> Show Jets</label>
+    <label><input type="checkbox" id="show-muons" checked /> Show Muons</label>
+    <label><input type="checkbox" id="show-photons" checked /> Show Photons</label>
+    <label><input type="checkbox" id="show-electrons" checked /> Show Electrons</label>
+    <button id="regenerate">🔄 Regenerate</button>
   </div>
 
   <canvas id="collision-canvas"></canvas>
 
-
   <script type="module" src="app.js"></script>
 </body>
 </html>
-
