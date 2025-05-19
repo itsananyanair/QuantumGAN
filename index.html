@@ -2,44 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QuantumGAN Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantumGAN LHC Simulator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>🔬 QuantumGAN Particle Collision Simulator</h1>
-    <p>Generate synthetic proton-proton collisions with adjustable physics parameters</p>
+    <h1>💥 QuantumGAN LHC Collision Simulator</h1>
   </header>
+  <main>
+    <section id="controls">
+      <button onclick="generateEvent('higgs')">Generate Higgs-like Event</button>
+      <button onclick="generateEvent('drell-yan')">Generate Drell-Yan Event</button>
+      <button onclick="generateEvent('qcd')">Generate QCD Multijet Event</button>
+      <div class="toggles">
+        <label><input type="checkbox" id="showEM" checked /> EM Showers</label>
+        <label><input type="checkbox" id="showJets" checked /> Hadronic Jets</label>
+        <label><input type="checkbox" id="showMuons" checked /> Muons</label>
+      </div>
+    </section>
 
-  <section class="controls">
-    <div class="slider-group">
-      <label for="numParticles">Number of Particles: <span id="numParticlesValue">100</span></label>
-      <input type="range" id="numParticles" min="10" max="500" value="100" />
-    </div>
-    <div class="slider-group">
-      <label for="energyMin">Min Energy (GeV): <span id="energyMinValue">20</span></label>
-      <input type="range" id="energyMin" min="1" max="100" value="20" />
-    </div>
-    <div class="slider-group">
-      <label for="energyMax">Max Energy (GeV): <span id="energyMaxValue">80</span></label>
-      <input type="range" id="energyMax" min="10" max="200" value="80" />
-    </div>
-    <div class="slider-group">
-      <label for="momentumSpread">Momentum Spread: <span id="momentumSpreadValue">5</span></label>
-      <input type="range" id="momentumSpread" min="1" max="20" value="5" />
-    </div>
-    <button id="generateBtn"> Run Simulation</button>
-  </section>
+    <canvas id="collisionCanvas"></canvas>
+  </main>
 
-  <section id="gan-output" class="output"></section>
+  <footer>
+    <p>Built with 💡 at CERN-level precision — purely HTML/CSS/JS</p>
+  </footer>
 
-  <script src="physics.js"></script>
-  <script src="gan.js"></script>
   <script src="utils.js"></script>
+  <script src="particles.js"></script>
+  <script src="visualize.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-
-
-
