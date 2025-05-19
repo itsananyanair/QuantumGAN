@@ -1,37 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuantumGAN LHC Simulator</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LHC QuantumGAN Simulator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>💥 QuantumGAN LHC Collision Simulator</h1>
-  </header>
-  <main>
-    <section id="controls">
-      <button onclick="generateEvent('higgs')">Generate Higgs-like Event</button>
-      <button onclick="generateEvent('drell-yan')">Generate Drell-Yan Event</button>
-      <button onclick="generateEvent('qcd')">Generate QCD Multijet Event</button>
-      <div class="toggles">
-        <label><input type="checkbox" id="showEM" checked /> EM Showers</label>
-        <label><input type="checkbox" id="showJets" checked /> Hadronic Jets</label>
-        <label><input type="checkbox" id="showMuons" checked /> Muons</label>
-      </div>
-    </section>
+  <h1>🌀 LHC QuantumGAN Simulator</h1>
 
-    <canvas id="collisionCanvas"></canvas>
-  </main>
+  <div id="controls">
+    <label for="event-select">Select Event:</label>
+    <select id="event-select">
+      <option value="higgs">Higgs-like</option>
+      <option value="drell-yan">Drell-Yan</option>
+      <option value="qcd">QCD Multijet</option>
+    </select>
 
-  <footer>
-    <p>Built with 💡 at CERN-level precision — purely HTML/CSS/JS</p>
-  </footer>
+    <div id="toggles">
+      <label><input type="checkbox" id="show-jets" checked> Show Jets</label>
+      <label><input type="checkbox" id="show-muons" checked> Show Muons</label>
+      <label><input type="checkbox" id="show-photons" checked> Show Photons</label>
+      <label><input type="checkbox" id="show-electrons" checked> Show Electrons</label>
+    </div>
 
-  <script src="utils.js"></script>
-  <script src="particles.js"></script>
-  <script src="visualize.js"></script>
-  <script src="app.js"></script>
+    <button id="regenerate">🔄 Regenerate Event</button>
+  </div>
+
+  <canvas id="collision-canvas"></canvas>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
+
