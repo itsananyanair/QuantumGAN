@@ -1,143 +1,44 @@
-/* Reset some basics */
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuantumGAN Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🔬 QuantumGAN Particle Collision Simulator</h1>
+    <p>Generate synthetic proton-proton collisions with adjustable physics parameters</p>
+  </header>
 
-body {
-  margin: 0;
-  background: #0a0a23;
-  color: #e0e0f0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+  <section class="controls">
+    <div class="slider-group">
+      <label for="numParticles">Number of Particles: <span id="numParticlesValue">100</span></label>
+      <input type="range" id="numParticles" min="10" max="500" value="100" />
+    </div>
+    <div class="slider-group">
+      <label for="energyMin">Min Energy (GeV): <span id="energyMinValue">20</span></label>
+      <input type="range" id="energyMin" min="1" max="100" value="20" />
+    </div>
+    <div class="slider-group">
+      <label for="energyMax">Max Energy (GeV): <span id="energyMaxValue">80</span></label>
+      <input type="range" id="energyMax" min="10" max="200" value="80" />
+    </div>
+    <div class="slider-group">
+      <label for="momentumSpread">Momentum Spread: <span id="momentumSpreadValue">5</span></label>
+      <input type="range" id="momentumSpread" min="1" max="20" value="5" />
+    </div>
+    <button id="generateBtn">🚀 Run Simulation</button>
+  </section>
 
-header {
-  background: linear-gradient(90deg, #003366, #000044);
-  padding: 1.5rem 2rem;
-  text-align: center;
-  box-shadow: 0 0 12px #001122;
-}
+  <section id="gan-output" class="output"></section>
 
-header h1 {
-  margin: 0;
-  font-weight: 900;
-  font-size: 2.8rem;
-  color: #66ccff;
-  text-shadow: 0 0 8px #33aaff;
-}
+  <script src="physics.js"></script>
+  <script src="gan.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
 
-header p {
-  margin: 0.3rem 0 0 0;
-  font-size: 1.1rem;
-  font-style: italic;
-  color: #99ccffaa;
-}
+ 
 
-main {
-  flex: 1;
-  padding: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-#controls {
-  background: #122244cc;
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 0 15px #003366bb;
-}
-
-#controls label {
-  display: block;
-  margin-bottom: 0.6rem;
-  font-weight: 600;
-  color: #aaddff;
-}
-
-#controls input[type="range"] {
-  width: 100%;
-  margin-bottom: 1.5rem;
-  -webkit-appearance: none;
-  height: 8px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #66ccff, #0044cc);
-  outline: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-#controls input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  background: #33aaff;
-  cursor: pointer;
-  border-radius: 50%;
-  border: 2px solid #66ccff;
-  box-shadow: 0 0 10px #33aaff;
-  transition: background 0.3s ease;
-}
-
-#controls input[type="range"]:hover::-webkit-slider-thumb {
-  background: #99ddff;
-}
-
-#controls button {
-  background: #0066ff;
-  border: none;
-  border-radius: 10px;
-  padding: 0.8rem 2rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 0 10px #3399ff;
-  transition: background 0.3s ease;
-  margin-top: 1rem;
-  display: block;
-  width: 100%;
-}
-
-#controls button:hover {
-  background: #3399ff;
-}
-
-#status-box {
-  margin-top: 1rem;
-  font-weight: 600;
-  color: #99ffcc;
-  min-height: 1.5em;
-}
-
-#outputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-}
-
-.output-panel {
-  background: #122244cc;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  flex: 1 1 400px;
-  max-height: 400px;
-  overflow-y: auto;
-  box-shadow: 0 0 12px #003366aa;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9rem;
-  white-space: pre-wrap;
-}
-
-footer {
-  background: #001933;
-  padding: 1rem 2rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #5588ccaa;
-  box-shadow: inset 0 1px 10px #223355aa;
-  margin-top: auto;
-}
