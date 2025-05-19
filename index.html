@@ -2,62 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuantumGAN: LHC Collision Simulator</title>
-
-  <!-- Favicon (optional) -->
-  <link rel="icon" href="assets/favicon.png" />
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Chart.js for plotting -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuantumGAN — LHC Collision Event Simulator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>🔬 QuantumGAN: LHC Collision Simulator</h1>
-    <p>Simulating proton-proton collisions using browser-based GANs and CMS Open Data</p>
+    <h1>QuantumGAN</h1>
+    <p>Simulating LHC Proton-Proton Collisions with Physics-Aware GAN</p>
   </header>
 
   <main>
-    <section class="controls">
-      <label for="dataUpload">📂 Load Collision Dataset (JSON):</label>
-      <input type="file" id="dataUpload" accept=".json" />
-
-      <button id="generateBtn">⚛️ Generate Synthetic Collision</button>
-      <button id="validateBtn">✅ Validate Physics</button>
-      <button id="resetBtn">🔄 Reset</button>
+    <section id="controls">
+      <button id="run-simulation">Run GAN Simulation</button>
+      <label for="upload-data" class="file-label">
+        Upload CMS Open Data (CSV)
+        <input type="file" id="upload-data" accept=".csv" hidden />
+      </label>
+      <div id="status-box"></div>
     </section>
 
-    <section class="results">
-      <div class="chart-container">
-        <h2>🧬 Invariant Mass Distribution</h2>
-        <canvas id="massChart"></canvas>
+    <section id="outputs">
+      <div id="gan-output" class="output-panel">
+        <!-- Synthetic GAN event results appear here -->
       </div>
-
-      <div class="chart-container">
-        <h2>📊 Particle Type Histogram</h2>
-        <canvas id="typeChart"></canvas>
-      </div>
-
-      <div class="event-log">
-        <h2>📝 Event Log</h2>
-        <pre id="eventOutput">Awaiting simulation...</pre>
+      <div id="real-data-output" class="output-panel">
+        <!-- Uploaded real/synthetic data preview -->
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Created by CERN-inspired physicist-engineer Ananya Nair for advanced particle collision simulation.</p>
+    <p>© 2025 QuantumGAN • Developed by CERN-Inspired Physicist & ML Engineer Ananya Nair</p>
   </footer>
 
-  <!-- JS Logic -->
   <script src="utils.js"></script>
   <script src="physics.js"></script>
-  <script src="plot.js"></script>
   <script src="gan.js"></script>
-  <script src="main.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
+
 
