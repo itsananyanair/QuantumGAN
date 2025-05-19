@@ -14,11 +14,19 @@
 
   <main>
     <section id="controls">
+      <label for="num-particles">Number of Particles: <output id="numParticlesVal">100</output></label>
+      <input type="range" id="num-particles" min="10" max="1000" value="100" step="10" />
+
+      <label for="energy-min">Energy Min (GeV): <output id="energyMinVal">50</output></label>
+      <input type="range" id="energy-min" min="0" max="1000" value="50" step="10" />
+
+      <label for="energy-max">Energy Max (GeV): <output id="energyMaxVal">150</output></label>
+      <input type="range" id="energy-max" min="0" max="1000" value="150" step="10" />
+
+      <label for="momentum-spread">Momentum Spread (GeV/c): <output id="momentumSpreadVal">10</output></label>
+      <input type="range" id="momentum-spread" min="0" max="50" value="10" step="1" />
+
       <button id="run-simulation">Run GAN Simulation</button>
-      <label for="upload-data" class="file-label">
-        Upload CMS Open Data (CSV)
-        <input type="file" id="upload-data" accept=".csv" hidden />
-      </label>
       <div id="status-box"></div>
     </section>
 
@@ -27,13 +35,13 @@
         <!-- Synthetic GAN event results appear here -->
       </div>
       <div id="real-data-output" class="output-panel">
-        <!-- Uploaded real/synthetic data preview -->
+        <!-- Reserved for real data or extra output -->
       </div>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 QuantumGAN • Developed by CERN-Inspired Physicist & ML Engineer Ananya Nair</p>
+    <p>© 2025 QuantumGAN • Developed by CERN-level Physicist & ML Engineer</p>
   </footer>
 
   <script src="utils.js"></script>
