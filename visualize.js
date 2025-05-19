@@ -1,41 +1,64 @@
 let canvas, ctx;
+let centerX, centerY;
+let animationFrame = 0;
+const totalFrames = 60;
+let particles = [];
 
 export function initCanvas() {
   canvas = document.getElementById('collision-canvas');
-  if (!canvas) {
-    console.error('Canvas element not found');
-    return;
-  }
   ctx = canvas.getContext('2d');
-  if (!ctx) {
-    console.error('2D context not available');
-    return;
-  }
-  console.log('Canvas initialized:', canvas.width, canvas.height);
+  centerX = canvas.width / 2;
+  centerY = canvas.height / 2;
 }
 
-export function visualizeEvent(particles) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let p of particles) {
-    const angle = p.phi;
-    const length = Math.min(p.energy * 10, 200);
-    const x = origin.x + length * Math.cos(angle);
-    const y = origin.y + length * Math.sin(angle);
-    ctx.strokeStyle = getColor(p.type);
-    ctx.lineWidth = Math.max(1, p.energy / 10);
-    ctx.beginPath();
-    ctx.moveTo(origin.x, origin.y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
+export function setParticles(particleList) {
+  particles = particleList;
 }
 
-function getColor(type) {
+function getColorForParticle(type) {
   switch (type) {
-    case "jet": return "red";
-    case "muon": return "blue";
-    case "photon": return "green";
-    case "electron": return "yellow";
-    default: return "white";
+    case 'jet': return 'red';
+    case 'muon': return 'blue';
+    case 'photon': return 'green';
+    case 'electron': return 'yellow';
+    case 'neutrino': return 'gray';
+    default: return 'white';
   }
+}
+
+function drawAnimatedTracks() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  animationFrame++;
+
+  particles.forEach(p => {
+    const energy = Math.min(p.energy, 1000);
+    const angle = Math.atan2(p.py, p.px);
+    const maxLen = (energy / 1000) * 300;
+    const currentLen = maxLen * (animationFrame / totalFrames);
+    const lineWidth = Math.max(1, (energy / 1000) * 4);
+
+    const endX = centerX + currentLen * Math.cos(angle);
+    const endY = centerY + currentLen * Math.sin(angle);
+
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = getColorForParticle(p.type);
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+
+    // Optional: draw label
+    ctx.fillStyle = 'white';
+    ctx.font = '12px monospace';
+    ctx.fillText(p.type, endX + 5, endY + 5);
+  });
+
+  if (animationFrame < totalFrames) {
+    requestAnimationFrame(drawAnimatedTracks);
+  }
+}
+
+export function animateCollision() {
+  animationFrame = 0;
+  drawAnimatedTracks();
 }
