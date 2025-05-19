@@ -1,10 +1,17 @@
 let canvas, ctx;
-let origin = { x: 400, y: 400 }; // Center of 800x800 canvas
 
 export function initCanvas() {
-  canvas = document.getElementById("collision-canvas");
-  ctx = canvas.getContext("2d");
-  console.log("Canvas loaded:", canvas.width, canvas.height);
+  canvas = document.getElementById('collision-canvas');
+  if (!canvas) {
+    console.error('Canvas element not found');
+    return;
+  }
+  ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('2D context not available');
+    return;
+  }
+  console.log('Canvas initialized:', canvas.width, canvas.height);
 }
 
 export function visualizeEvent(particles) {
