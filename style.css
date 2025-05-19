@@ -1,0 +1,25 @@
+body {
+  background-color: #111;
+  color: #eee;
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+#controls {
+  margin: 10px auto;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+canvas {
+  background: black;
+  display: block;
+  margin: 20px auto;
+  border: 2px solid #444;
+  width: 800px;
+  height: 800px;
+}
