@@ -1,34 +1,51 @@
 // app.js
+import { initCanvas, visualizeEvent } from './visualize.js';
+import { generateParticlesForEvent } from './particles.js';
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sliders = ["numParticles", "energyMin", "energyMax", "momentumSpread"];
-  sliders.forEach(id => {
-    const slider = document.getElementById(id);
-    const label = document.getElementById(id + "Value");
-    slider.addEventListener("input", () => {
-      label.textContent = slider.value;
+let currentEventType = 'higgs';
+let showJets = true;
+let showMuons = true;
+let showPhotons = true;
+let showElectrons = true;
+
+function initApp() {
+  initCanvas();
+  setupUI();
+  triggerEvent(currentEventType);
+}
+
+function setupUI() {
+  document.getElementById('event-select').addEventListener('change', (e) => {
+    currentEventType = e.target.value;
+    triggerEvent(currentEventType);
+  });
+
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      showJets = document.getElementById('show-jets').checked;
+      showMuons = document.getElementById('show-muons').checked;
+      showPhotons = document.getElementById('show-photons').checked;
+      showElectrons = document.getElementById('show-electrons').checked;
+      triggerEvent(currentEventType);
     });
   });
 
-  document.getElementById("generateBtn").addEventListener("click", async () => {
-    const params = {
-      numParticles: +document.getElementById("numParticles").value,
-      energyMin: +document.getElementById("energyMin").value,
-      energyMax: +document.getElementById("energyMax").value,
-      momentumSpread: +document.getElementById("momentumSpread").value,
-    };
-
-    const particles = await runGanModel(params);
-    displayParticles(particles);
+  document.getElementById('regenerate').addEventListener('click', () => {
+    triggerEvent(currentEventType);
   });
-});
-
-// Display generated particles in output panel
-function displayParticles(particles) {
-  const div = document.getElementById("gan-output");
-  const preview = particles.slice(0, 10).map((p, i) =>
-    `#${i + 1}: ${p.type} | E=${p.energy.toFixed(2)} GeV | p=(${p.px.toFixed(2)}, ${p.py.toFixed(2)}, ${p.pz.toFixed(2)})`
-  ).join('\n');
-
-  div.textContent = `🎉 Generated Particles (${particles.length} total):\n\n${preview}\n\n...and more`;
 }
+
+function triggerEvent(type) {
+  const allParticles = generateParticlesForEvent(type);
+  const filtered = allParticles.filter(p => {
+    if (p.type === 'jet' && !showJets) return false;
+    if (p.type === 'muon' && !showMuons) return false;
+    if (p.type === 'photon' && !showPhotons) return false;
+    if (p.type === 'electron' && !showElectrons) return false;
+    return true;
+  });
+  visualizeEvent(filtered);
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
+
