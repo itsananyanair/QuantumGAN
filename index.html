@@ -3,30 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuantumGAN Collider Simulator</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>QuantumGAN: LHC Collision Simulator</title>
+
+  <!-- Favicon (optional) -->
+  <link rel="icon" href="assets/favicon.png" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js for plotting -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>💥 QuantumGAN: Proton-Proton Collision Simulator</h1>
-    
-    <form id="collisionForm">
-      <label for="energyInput">Total Collision Energy (GeV):</label>
-      <input type="number" id="energyInput" min="100" max="14000" step="10" required value="13000" />
+  <header>
+    <h1>🔬 QuantumGAN: LHC Collision Simulator</h1>
+    <p>Simulating proton-proton collisions using browser-based GANs and CMS Open Data</p>
+  </header>
 
-      <label for="eventCount">Number of Events:</label>
-      <input type="number" id="eventCount" min="1" max="1000" value="100" />
+  <main>
+    <section class="controls">
+      <label for="dataUpload">📂 Load Collision Dataset (JSON):</label>
+      <input type="file" id="dataUpload" accept=".json" />
 
-      <button type="submit">Simulate Events</button>
-    </form>
+      <button id="generateBtn">⚛️ Generate Synthetic Collision</button>
+      <button id="validateBtn">✅ Validate Physics</button>
+      <button id="resetBtn">🔄 Reset</button>
+    </section>
 
-    <div id="results">
-      <canvas id="massChart"></canvas>
-      <canvas id="momentumChart"></canvas>
-    </div>
-  </div>
+    <section class="results">
+      <div class="chart-container">
+        <h2>🧬 Invariant Mass Distribution</h2>
+        <canvas id="massChart"></canvas>
+      </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+      <div class="chart-container">
+        <h2>📊 Particle Type Histogram</h2>
+        <canvas id="typeChart"></canvas>
+      </div>
+
+      <div class="event-log">
+        <h2>📝 Event Log</h2>
+        <pre id="eventOutput">Awaiting simulation...</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Created by CERN-inspired physicist-engineer Ananya Nair for advanced particle collision simulation.</p>
+  </footer>
+
+  <!-- JS Logic -->
+  <script src="utils.js"></script>
+  <script src="physics.js"></script>
+  <script src="plot.js"></script>
+  <script src="gan.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
+
