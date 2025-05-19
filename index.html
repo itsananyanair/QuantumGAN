@@ -2,45 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QuantumGAN — LHC Collision Event Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuantumGAN Simulator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>QuantumGAN</h1>
-    <p>Simulating LHC Proton-Proton Collisions with Physics-Aware GAN</p>
+    <h1>🔬 QuantumGAN Particle Collision Simulator</h1>
+    <p>Generate synthetic proton-proton collisions with adjustable physics parameters</p>
   </header>
 
-  <main>
-    <section id="controls">
-      <label for="num-particles">Number of Particles: <output id="numParticlesVal">100</output></label>
-      <input type="range" id="num-particles" min="10" max="1000" value="100" step="10" />
+  <section class="controls">
+    <div class="slider-group">
+      <label for="numParticles">Number of Particles: <span id="numParticlesValue">100</span></label>
+      <input type="range" id="numParticles" min="10" max="500" value="100" />
+    </div>
+    <div class="slider-group">
+      <label for="energyMin">Min Energy (GeV): <span id="energyMinValue">20</span></label>
+      <input type="range" id="energyMin" min="1" max="100" value="20" />
+    </div>
+    <div class="slider-group">
+      <label for="energyMax">Max Energy (GeV): <span id="energyMaxValue">80</span></label>
+      <input type="range" id="energyMax" min="10" max="200" value="80" />
+    </div>
+    <div class="slider-group">
+      <label for="momentumSpread">Momentum Spread: <span id="momentumSpreadValue">5</span></label>
+      <input type="range" id="momentumSpread" min="1" max="20" value="5" />
+    </div>
+    <button id="generateBtn"> Run Simulation</button>
+  </section>
 
-      <label for="energy-min">Energy Min (GeV): <output id="energyMinVal">50</output></label>
-      <input type="range" id="energy-min" min="0" max="1000" value="50" step="10" />
+  <section id="gan-output" class="output"></section>
 
-      <label for="energy-max">Energy Max (GeV): <output id="energyMaxVal">150</output></label>
-      <input type="range" id="energy-max" min="0" max="1000" value="150" step="10" />
-
-      <label for="momentum-spread">Momentum Spread (GeV/c): <output id="momentumSpreadVal">10</output></label>
-      <input type="range" id="momentum-spread" min="0" max="50" value="10" step="1" />
-
-      <button id="run-simulation">Run GAN Simulation</button>
-      <div id="status-box"></div>
-    </section>
-
-    <section id="outputs">
-      <div id="gan-output" class="output-panel"></div>
-      <div id="real-data-output" class="output-panel"></div>
-    </section>
-  </main>
-
-  <footer>
-    <p>© 2025 QuantumGAN • Developed by CERN-level Physicist & ML Engineer</p>
-  </footer>
-
-  <script src="utils.js"></script>
   <script src="physics.js"></script>
   <script src="gan.js"></script>
   <script src="app.js"></script>
