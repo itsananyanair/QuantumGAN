@@ -1,56 +1,34 @@
-// visualize.js
-
 let canvas, ctx;
-const origin = { x: 400, y: 400 }; // Center of canvas (collision point)
+let origin = { x: 400, y: 400 }; // Center of 800x800 canvas
 
-function initCanvas() {
-  canvas = document.getElementById('collision-canvas');
-  ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-  console.log('Canvas initialized:', canvas.width, canvas.height);
+export function initCanvas() {
+  canvas = document.getElementById("collision-canvas");
+  ctx = canvas.getContext("2d");
+  console.log("Canvas loaded:", canvas.width, canvas.height);
 }
 
-function resizeCanvas() {
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-  origin.x = canvas.width / 2;
-  origin.y = canvas.height / 2;
-}
-
-function clearCanvas() {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawParticleTrack(particle, frame = 1) {
-  const { x: dx, y: dy } = phiToDirection(particle.phi);
-  const { length, thickness } = particle.getDisplayProps();
-  const maxFrame = 30;
-  const prog = Math.min(frame / maxFrame, 1);
-  const x = origin.x;
-  const y = origin.y;
-
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x + dx * length * prog, y + dy * length * prog);
-  ctx.strokeStyle = particle.color;
-  ctx.lineWidth = thickness;
-  ctx.stroke();
-}
-
-function animateParticles(particles, frame = 1) {
-  clearCanvas();
-  for (const p of particles) {
-    drawParticleTrack(p, frame);
-  }
-  if (frame < 30) {
-    requestAnimationFrame(() => animateParticles(particles, frame + 1));
+export function visualizeEvent(particles) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let p of particles) {
+    const angle = p.phi;
+    const length = Math.min(p.energy * 10, 200);
+    const x = origin.x + length * Math.cos(angle);
+    const y = origin.y + length * Math.sin(angle);
+    ctx.strokeStyle = getColor(p.type);
+    ctx.lineWidth = Math.max(1, p.energy / 10);
+    ctx.beginPath();
+    ctx.moveTo(origin.x, origin.y);
+    ctx.lineTo(x, y);
+    ctx.stroke();
   }
 }
 
-function visualizeEvent(particles) {
-  animateParticles(particles, 1);
+function getColor(type) {
+  switch (type) {
+    case "jet": return "red";
+    case "muon": return "blue";
+    case "photon": return "green";
+    case "electron": return "yellow";
+    default: return "white";
+  }
 }
-
-export { initCanvas, visualizeEvent };
