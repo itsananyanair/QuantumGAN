@@ -1,30 +1,55 @@
 // utils.js
 
-// Generate a random float between min and max
-function randomFloat(min, max) {
-  return min + Math.random() * (max - min);
+// Returns a random float between min and max
+function randRange(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
-// Generate a random 3D vector with given spread
-function randomMomentum(spread) {
+// Returns a random item from an array
+function randChoice(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Converts polar (energy, eta, phi) to Cartesian (px, py, pz)
+function polarToCartesian(energy, eta, phi) {
+  const theta = 2 * Math.atan(Math.exp(-eta));
+  const p = energy; // assume massless particle approximation
   return {
-    px: randomFloat(-spread, spread),
-    py: randomFloat(-spread, spread),
-    pz: randomFloat(-spread, spread)
+    px: p * Math.cos(phi),
+    py: p * Math.sin(phi),
+    pz: p / Math.tan(theta),
+  };
+}
+
+// Map particle type to color
+function getParticleColor(type) {
+  const colorMap = {
+    jet: 'red',
+    muon: 'blue',
+    photon: 'green',
+    electron: 'yellow',
+    default: 'white',
+  };
+  return colorMap[type] || colorMap.default;
+}
+
+// Normalize a vector
+function normalize(vec) {
+  const mag = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+  return mag === 0 ? { x: 0, y: 0 } : { x: vec.x / mag, y: vec.y / mag };
+}
+
+// Converts phi to 2D canvas x, y directions
+function phiToDirection(phi) {
+  return {
+    x: Math.cos(phi),
+    y: Math.sin(phi),
   };
 }
 
 // Clamp a value between min and max
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
 }
 
-// Generate a UUID (if needed for IDs or tagging)
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
 
