@@ -45,3 +45,4 @@ window.addEventListener('keydown', (e) => {
     secretSequence = [];
   }
 });
+
