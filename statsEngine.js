@@ -1,4 +1,3 @@
-// statsEngine.js
 import { getMomentumVector } from './analytics.js';
 
 // Generates a pseudorapidity vs. φ scatter dataset
@@ -43,4 +42,17 @@ export function detectUnphysicalResults(particles) {
   return flags;
 }
 
-
+// Draw detector structure with concentric rings
+export function drawDetectorShells(container, numShells = 4) {
+  const radius = container.clientWidth / 2 - 10;
+  for (let i = 1; i <= numShells; i++) {
+    const ring = document.createElement('div');
+    ring.className = 'detector-shell';
+    const r = (i / numShells) * radius;
+    ring.style.width = `${2 * r}px`;
+    ring.style.height = `${2 * r}px`;
+    ring.style.left = `${(container.clientWidth - 2 * r) / 2}px`;
+    ring.style.top = `${(container.clientHeight - 2 * r) / 2}px`;
+    container.appendChild(ring);
+  }
+}
