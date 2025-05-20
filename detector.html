@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detector View</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      background: radial-gradient(circle at center, #444 0%, #000 100%);
+    }
+  </style>
+</head>
+<body>
+<canvas id="detector" width="600" height="600"></canvas>
+<script type="module">
+  const canvas = document.getElementById('detector');
+  const ctx = canvas.getContext('2d');
+  const center = 300;
+
+  function drawTrack(eta, phi) {
+    const r = 250 * Math.tanh(eta);
+    const angle = phi;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = `hsl(${Math.random()*360}, 100%, 70%)`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < 10; i++) {
+    const eta = (Math.random() - 0.5) * 6;
+    const phi = Math.random() * 2 * Math.PI;
+    drawTrack(eta, phi);
+  }
+</script>
+</body>
+</html>
