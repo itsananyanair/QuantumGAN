@@ -1,41 +1,102 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QuantumGAN - Proton Collision Simulator</title>
-  <link rel="stylesheet" href="styles.css"/>
-  <script type="module" src="script.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuantumGAN - ATLAS Collision Simulator</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
     <h1>QuantumGAN</h1>
-    <button id="themeToggle">🌓</button>
+    <button id="theme-toggle">Toggle Theme</button>
   </header>
 
   <main>
-    <section id="controls">
-      <label for="energyInput">Collision Energy (GeV):</label>
-      <input type="number" id="energyInput" value="1000" min="1" />
-      <button id="simulateBtn">Simulate Collision</button>
-      <button id="nerdModeToggle">🤓 Nerd Mode</button>
-      <a href="detector.html" target="_blank">🧲 Detector View</a>
+    <section id="control-panel">
+      <label for="collision-energy">Collision Energy (GeV):</label>
+      <input type="number" id="collision-energy" value="13000" min="100" max="14000">
+      <button onclick="simulateEvent()">Simulate</button>
     </section>
 
-    <section id="logPanel">
-      <h2>Quantum Log</h2>
-      <div id="console"></div>
+    <section id="detector-viewport-wrapper">
+      <h2>ATLAS Detector View</h2>
+      <div id="detector-viewport">
+        <!-- Particles rendered here -->
+      </div>
     </section>
 
-    <section id="results">
-      <h2>Particles</h2>
-      <div id="particleContainer"></div>
+    <section id="particles-output">
+      <h2>Generated Particles</h2>
+      <div id="particle-cards"></div>
     </section>
   </main>
 
   <footer>
-    <p>Made with 💥 at CERN (in spirit). MIT Licensed.</p>
+    <small>QuantumGAN © 2025 — Ananya Nair @ CERN (in spirit)</small>
   </footer>
+
+  <script type="module">
+    import { generateCollisionEvent } from './script.js';
+
+    window.simulateEvent = () => {
+      const energy = parseFloat(document.getElementById('collision-energy').value);
+      const particles = generateCollisionEvent(energy);
+      renderParticles(particles);
+      renderCards(particles);
+    };
+
+    function renderParticles(particles) {
+      const container = document.getElementById('detector-viewport');
+      container.innerHTML = '';
+      particles.forEach(p => {
+        const dot = document.createElement('div');
+        dot.className = 'particle-dot';
+        dot.style.backgroundColor = getColorByType(p.type);
+        dot.innerText = p.label;
+
+        const phi = (p.phi * Math.PI) / 180;
+        const radius = Math.min(180, p.energy * 0.5);
+
+        const x = 200 + radius * Math.cos(phi);
+        const y = 200 + radius * Math.sin(phi);
+
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
+        container.appendChild(dot);
+      });
+    }
+
+    function renderCards(particles) {
+      const cards = document.getElementById('particle-cards');
+      cards.innerHTML = '';
+      particles.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'particle-card';
+        card.innerHTML = `
+          <strong>${p.label}</strong><br>
+          Type: ${p.type}<br>
+          Energy: ${p.energy.toFixed(2)} GeV<br>
+          pT: ${p.pT.toFixed(2)}<br>
+          η: ${p.eta.toFixed(2)}<br>
+          φ: ${p.phi.toFixed(2)}°
+        `;
+        cards.appendChild(card);
+      });
+    }
+
+    function getColorByType(type) {
+      const map = {
+        quark: '#ff4d4d',
+        lepton: '#4da6ff',
+        gluon: '#4dff4d',
+        boson: '#ffa64d',
+        higgs: '#ffff66'
+      };
+      return map[type.toLowerCase()] || '#ccc';
+    }
+  </script>
+  <script src="eastereggs.js"></script>
 </body>
 </html>
-
