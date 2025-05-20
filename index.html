@@ -1,101 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuantumGAN - ATLAS Collision Simulator</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuantumGAN - Proton Collision Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>QuantumGAN</h1>
-    <button id="theme-toggle">Toggle Theme</button>
+    <button id="theme-toggle" aria-label="Toggle light/dark theme">🌙</button>
   </header>
 
   <main>
-    <section id="control-panel">
-      <label for="collision-energy">Collision Energy (GeV):</label>
-      <input type="number" id="collision-energy" value="13000" min="100" max="14000">
-      <button onclick="simulateEvent()">Simulate</button>
+    <section id="control-panel" aria-label="Collision Controls">
+      <label for="energy-input">Collision Energy (GeV): </label>
+      <input
+        type="number"
+        id="energy-input"
+        min="10"
+        max="14000"
+        step="10"
+        value="13000"
+        aria-describedby="energy-desc"
+      />
+      <span id="energy-desc">Typical LHC proton collision energy</span>
+      <button id="simulate-btn">Simulate Collision</button>
+      <button id="nerd-mode-toggle">Nerd Mode</button>
     </section>
 
-    <section id="detector-viewport-wrapper">
-      <h2>ATLAS Detector View</h2>
-      <div id="detector-viewport">
-        <!-- Particles rendered here -->
-      </div>
+    <section id="detector-viewport-wrapper" aria-label="Particle Detector View">
+      <h2>Detector View</h2>
+      <div id="detector-viewport" role="img" aria-live="polite" aria-label="Particle tracks in detector"></div>
     </section>
 
-    <section id="particles-output">
-      <h2>Generated Particles</h2>
-      <div id="particle-cards"></div>
+    <section id="particle-cards" aria-live="polite" aria-label="Generated Particle Data"></section>
+
+    <section id="console-log" aria-live="polite" aria-label="Physics feedback console" tabindex="0" style="background:#111; color:#0f0; font-family: monospace; padding: 1rem; margin-top: 2rem; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+      <div id="console-messages"></div>
     </section>
   </main>
 
   <footer>
-    <small>QuantumGAN © 2025 — Ananya Nair @ CERN (in spirit)</small>
+    &copy; 2025 QuantumGAN · Open-source physics simulation project
   </footer>
 
   <script type="module">
     import { generateCollisionEvent } from './script.js';
+    import { computeInvariantMass, checkMomentumConservation, getParticleTypeDistribution } from './analytics.js';
+    import { getEtaPhiScatterData, detectUnphysicalResults } from './statsEngine.js';
+    import './eastereggs.js';
 
-    window.simulateEvent = () => {
-      const energy = parseFloat(document.getElementById('collision-energy').value);
-      const particles = generateCollisionEvent(energy);
-      renderParticles(particles);
-      renderCards(particles);
+    const energyInput = document.getElementById('energy-input');
+    const simulateBtn = document.getElementById('simulate-btn');
+    const detectorViewport = document.getElementById('detector-viewport');
+    const particleCards = document.getElementById('particle-cards');
+    const consoleMessages = document.getElementById('console-messages');
+    const themeToggle = document.getElementById('theme-toggle');
+    const nerdModeBtn = document.getElementById('nerd-mode-toggle');
+
+    let particles = [];
+    let nerdMode = false;
+
+    // Colors by particle type
+    const particleColors = {
+      quark: '#ff4136',
+      lepton: '#2ecc40',
+      gluon: '#0074d9',
+      boson: '#ff851b',
+      default: '#aaa'
     };
 
-    function renderParticles(particles) {
-      const container = document.getElementById('detector-viewport');
-      container.innerHTML = '';
-      particles.forEach(p => {
+    function logMessage(msg) {
+      const p = document.createElement('div');
+      p.textContent = msg;
+      consoleMessages.appendChild(p);
+      consoleMessages.scrollTop = consoleMessages.scrollHeight;
+    }
+
+    function clearLog() {
+      consoleMessages.innerHTML = '';
+    }
+
+    function clearDetector() {
+      detectorViewport.innerHTML = '';
+    }
+
+    function renderDetectorParticles(particles) {
+      clearDetector();
+
+      const radius = detectorViewport.clientWidth / 2 - 20;
+
+      particles.forEach((p, i) => {
         const dot = document.createElement('div');
         dot.className = 'particle-dot';
-        dot.style.backgroundColor = getColorByType(p.type);
-        dot.innerText = p.label;
+        dot.textContent = p.label;
 
-        const phi = (p.phi * Math.PI) / 180;
-        const radius = Math.min(180, p.energy * 0.5);
+        const color = particleColors[p.type] || particleColors.default;
+        dot.style.backgroundColor = color;
 
-        const x = 200 + radius * Math.cos(phi);
-        const y = 200 + radius * Math.sin(phi);
+        // Position by polar coordinates (phi, scaled radius by pT)
+        const phiRad = (p.phi * Math.PI) / 180;
+
+        // Bounce animation - random speed and direction
+        const speed = 0.5 + Math.random();
+        const direction = (performance.now() / 1000 + i) * speed;
+
+        // Calculate initial polar coords
+        let r = (p.pT / 50) * radius;
+        if (r > radius) r = radius;
+
+        // Animate bouncing away (sinusoidal pulse)
+        const offsetR = r + 10 * Math.sin(direction * 5);
+
+        const x = radius + offsetR * Math.cos(phiRad);
+        const y = radius + offsetR * Math.sin(phiRad);
 
         dot.style.left = `${x}px`;
         dot.style.top = `${y}px`;
-        container.appendChild(dot);
+
+        detectorViewport.appendChild(dot);
+
+        // Animate bouncing continuously with requestAnimationFrame
+        function animate() {
+          const t = performance.now() / 1000;
+          const offset = r + 10 * Math.sin(direction + t * 5);
+          const nx = radius + offset * Math.cos(phiRad);
+          const ny = radius + offset * Math.sin(phiRad);
+          dot.style.left = `${nx}px`;
+          dot.style.top = `${ny}px`;
+          requestAnimationFrame(animate);
+        }
+        animate();
       });
     }
 
-    function renderCards(particles) {
-      const cards = document.getElementById('particle-cards');
-      cards.innerHTML = '';
-      particles.forEach(p => {
-        const card = document.createElement('div');
+    function renderParticleCards(particles) {
+      particleCards.innerHTML = '';
+      particles.forEach((p) => {
+        const card = document.createElement('article');
         card.className = 'particle-card';
         card.innerHTML = `
-          <strong>${p.label}</strong><br>
-          Type: ${p.type}<br>
-          Energy: ${p.energy.toFixed(2)} GeV<br>
-          pT: ${p.pT.toFixed(2)}<br>
-          η: ${p.eta.toFixed(2)}<br>
-          φ: ${p.phi.toFixed(2)}°
+          <strong>${p.label} (${p.type})</strong><br>
+          pT: ${p.pT} GeV<br>
+          η: ${p.eta}<br>
+          φ: ${p.phi}°<br>
+          Energy: ${p.energy} GeV
+          ${nerdMode ? `<br><small>4-vector &eta;φ data visible in Nerd Mode</small>` : ''}
         `;
-        cards.appendChild(card);
+        particleCards.appendChild(card);
       });
     }
 
-    function getColorByType(type) {
-      const map = {
-        quark: '#ff4d4d',
-        lepton: '#4da6ff',
-        gluon: '#4dff4d',
-        boson: '#ffa64d',
-        higgs: '#ffff66'
-      };
-      return map[type.toLowerCase()] || '#ccc';
+    function updatePhysicsFeedback(particles) {
+      clearLog();
+      const mass = computeInvariantMass(particles);
+      const momentumOk = checkMomentumConservation(particles);
+      const dist = getParticleTypeDistribution(particles);
+      const unphysicalFlags = detectUnphysicalResults(particles);
+
+      logMessage(`Invariant mass: ${isNaN(mass) ? 'Non-physical' : mass.toFixed(3)} GeV/c²`);
+      logMessage(`Momentum conservation: ${momentumOk ? '✔️ conserved' : '❌ violated'}`);
+      logMessage('Particle distribution: ' + JSON.stringify(dist));
+      if (unphysicalFlags.length) {
+        unphysicalFlags.forEach(flag => logMessage(flag));
+      }
     }
+
+    simulateBtn.addEventListener('click', () => {
+      const energy = Number(energyInput.value);
+      if (!energy || energy < 10) {
+        alert('Please enter a valid collision energy ≥ 10 GeV');
+        return;
+      }
+      particles = generateCollisionEvent(energy);
+      renderDetectorParticles(particles);
+      renderParticleCards(particles);
+      updatePhysicsFeedback(particles);
+    });
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    });
+
+    nerdModeBtn.addEventListener('click', () => {
+      nerdMode = !nerdMode;
+      nerdModeBtn.textContent = nerdMode ? 'Nerd Mode: ON' : 'Nerd Mode: OFF';
+      renderParticleCards(particles);
+    });
+
+    // Initial setup
+    document.body.classList.add('dark'); // start dark by default
+    themeToggle.textContent = '☀️';
+
+    // Auto simulate on load
+    simulateBtn.click();
   </script>
-  <script src="eastereggs.js"></script>
 </body>
 </html>
