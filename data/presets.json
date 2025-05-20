@@ -1,0 +1,10 @@
+{
+  "standard": {
+    "energy": 1000,
+    "description": "Standard LHC collision energy."
+  },
+  "higgs_mode": {
+    "energy": 1250,
+    "description": "Simulate potential Higgs decays."
+  }
+}
