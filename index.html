@@ -31,7 +31,7 @@
 
     <section id="detector-viewport-wrapper" aria-label="Particle Detector View">
       <h2>Detector View</h2>
-      <div id="detector-viewport" role="img" aria-live="polite" aria-label="Particle tracks in detector"></div>
+      <div id="detector-viewport" class="detector-container" role="img" aria-live="polite" aria-label="Particle tracks in detector"></div>
     </section>
 
     <section id="particle-cards" aria-live="polite" aria-label="Generated Particle Data"></section>
@@ -48,7 +48,7 @@
   <script type="module">
     import { generateCollisionEvent } from './script.js';
     import { computeInvariantMass, checkMomentumConservation, getParticleTypeDistribution } from './analytics.js';
-    import { getEtaPhiScatterData, detectUnphysicalResults } from './statsEngine.js';
+    import { getEtaPhiScatterData, detectUnphysicalResults, drawDetectorShells } from './statsEngine.js';
     import './eastereggs.js';
 
     const energyInput = document.getElementById('energy-input');
@@ -89,6 +89,9 @@
     function renderDetectorParticles(particles) {
       clearDetector();
 
+      // Draw shell rings
+      drawDetectorShells(detectorViewport, 4);
+
       const radius = detectorViewport.clientWidth / 2 - 20;
 
       particles.forEach((p, i) => {
@@ -110,7 +113,6 @@
         let r = (p.pT / 50) * radius;
         if (r > radius) r = radius;
 
-        // Animate bouncing away (sinusoidal pulse)
         const offsetR = r + 10 * Math.sin(direction * 5);
 
         const x = radius + offsetR * Math.cos(phiRad);
