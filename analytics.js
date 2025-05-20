@@ -1,25 +1,66 @@
-// Compute invariant mass from 4-momentum vectors
+// Basic physics constants (GeV/c²)
+const MASS = {
+  'e⁻': 0.000511,
+  'μ⁻': 0.105,
+  'νₑ': 0,
+  'ν_μ': 0,
+  'u': 0.002,
+  'd': 0.005,
+  's': 0.095,
+  'c': 1.27,
+  'b': 4.18,
+  't': 173,
+  'Z⁰': 91.2,
+  'W⁺': 80.4,
+  'W⁻': 80.4,
+  'γ': 0,
+  'g': 0
+};
+
+// Converts η and φ to momentum vector components
+function getMomentumVector(pT, eta, phiDeg) {
+  const phi = (phiDeg * Math.PI) / 180;
+  const px = pT * Math.cos(phi);
+  const py = pT * Math.sin(phi);
+  const pz = pT * Math.sinh(eta);
+  return { px, py, pz };
+}
+
+// Compute total 4-vector from a list of particles
+function computeTotal4Vector(particles) {
+  let total = { px: 0, py: 0, pz: 0, E: 0 };
+  for (const p of particles) {
+    const { px, py, pz } = getMomentumVector(p.pT, p.eta, p.phi);
+    total.px += px;
+    total.py += py;
+    total.pz += pz;
+    total.E += p.energy;
+  }
+  return total;
+}
+
+// Compute invariant mass from total 4-vector
 export function computeInvariantMass(particles) {
-  const total = particles.reduce((acc, p) => {
-    acc.E += p.vector[0];
-    acc.px += p.vector[1];
-    acc.py += p.vector[2];
-    acc.pz += p.vector[3];
-    return acc;
-  }, { E: 0, px: 0, py: 0, pz: 0 });
-
-  const mass2 = total.E**2 - (total.px**2 + total.py**2 + total.pz**2);
-  return mass2 >= 0 ? Math.sqrt(mass2) : NaN;
+  const { px, py, pz, E } = computeTotal4Vector(particles);
+  const massSquared = E * E - (px * px + py * py + pz * pz);
+  return massSquared >= 0 ? Math.sqrt(massSquared) : NaN;
 }
 
-export function checkConservation(particles) {
-  const totalP = particles.reduce((acc, p) => {
-    acc.px += p.vector[1];
-    acc.py += p.vector[2];
-    acc.pz += p.vector[3];
-    return acc;
-  }, { px: 0, py: 0, pz: 0 });
-
-  const tol = 1e-2;
-  return Math.abs(totalP.px) < tol && Math.abs(totalP.py) < tol && Math.abs(totalP.pz) < tol;
+// Check momentum conservation (px, py, pz close to zero)
+export function checkMomentumConservation(particles) {
+  const { px, py, pz } = computeTotal4Vector(particles);
+  const tolerance = 1e-3;
+  return Math.abs(px) < tolerance && Math.abs(py) < tolerance && Math.abs(pz) < tolerance;
 }
+
+// Get distribution of particle types
+export function getParticleTypeDistribution(particles) {
+  const dist = {};
+  for (const p of particles) {
+    dist[p.type] = (dist[p.type] || 0) + 1;
+  }
+  return dist;
+}
+
+// Export mass lookup and helpers for external use if needed
+export { MASS, getMomentumVector };
