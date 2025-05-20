@@ -1,47 +1,42 @@
-import { simulateEvent } from './statsEngine.js';
-import { computeInvariantMass, checkConservation } from './analytics.js';
-import './eastereggs.js';
+// Generates a synthetic proton-proton collision event
+export function generateCollisionEvent(energyGeV) {
+  const numParticles = Math.floor(Math.random() * 4) + 2;
+  const particles = [];
 
-const energyInput = document.getElementById('energyInput');
-const simulateBtn = document.getElementById('simulateBtn');
-const particleContainer = document.getElementById('particleContainer');
-const consolePanel = document.getElementById('console');
-const themeToggle = document.getElementById('themeToggle');
-const nerdModeToggle = document.getElementById('nerdModeToggle');
+  for (let i = 0; i < numParticles; i++) {
+    const type = randomParticleType();
+    const label = getParticleLabel(type);
+    const pT = +(Math.random() * energyGeV * 0.1).toFixed(2);
+    const eta = +(Math.random() * 5 - 2.5).toFixed(2); // pseudorapidity range
+    const phi = +(Math.random() * 360).toFixed(2);
+    const energy = +(pT * (1 + Math.abs(eta) * 0.1)).toFixed(2); // fake logic
 
-let nerdMode = false;
+    particles.push({ type, label, pT, eta, phi, energy });
+  }
 
-themeToggle.onclick = () => document.body.classList.toggle('dark');
-nerdModeToggle.onclick = () => nerdMode = !nerdMode;
-
-simulateBtn.onclick = () => {
-  const energy = parseFloat(energyInput.value);
-  const event = simulateEvent(energy);
-
-  particleContainer.innerHTML = '';
-  consolePanel.innerHTML = '';
-
-  event.particles.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'particle-card';
-    card.innerHTML = `
-      <strong>${p.type}</strong><br/>
-      E = ${p.energy.toFixed(2)} GeV<br/>
-      |p| = ${p.momentum.toFixed(2)} GeV/c<br/>
-      η = ${p.eta.toFixed(2)}, φ = ${p.phi.toFixed(2)} rad
-      ${nerdMode ? `<pre>${JSON.stringify(p.vector, null, 1)}</pre>` : ''}
-    `;
-    particleContainer.appendChild(card);
-  });
-
-  const invMass = computeInvariantMass(event.particles);
-  const conserved = checkConservation(event.particles);
-  log(`Invariant Mass: ${invMass.toFixed(3)} GeV/c²`);
-  log(`Momentum Conservation: ${conserved ? 'OK' : '⚠️ Violated'}`);
-};
-
-function log(msg) {
-  const line = document.createElement('div');
-  line.textContent = msg;
-  consolePanel.appendChild(line);
+  return particles;
 }
+
+function randomParticleType() {
+  const types = ['quark', 'lepton', 'gluon', 'boson'];
+  return types[Math.floor(Math.random() * types.length)];
+}
+
+function getParticleLabel(type) {
+  const labelMap = {
+    quark: ['u', 'd', 's', 'c', 'b', 't'],
+    lepton: ['e⁻', 'μ⁻', 'νₑ', 'ν_μ'],
+    gluon: ['g'],
+    boson: ['Z⁰', 'W⁺', 'W⁻', 'γ']
+  };
+  const options = labelMap[type];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Optional: dark mode toggle logic
+window.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('theme-toggle');
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+  });
+});
