@@ -1,203 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QuantumGAN - Proton Collision Simulator</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumGAN - LHC Collision Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>QuantumGAN</h1>
-    <button id="theme-toggle" aria-label="Toggle light/dark theme">🌙</button>
-  </header>
+    <header class="app-header">
+        <div class="logo-container">
+            <h1>Quantum<span class="gan-text">GAN</span></h1>
+            <p class="subtitle">Generative Adversarial Network for LHC Proton-Proton Collisions</p>
+        </div>
+        <div class="cern-badge">
+            <span>CERN Open Data Compatible</span>
+        </div>
+    </header>
 
-  <main>
-    <section id="control-panel" aria-label="Collision Controls">
-      <label for="energy-input">Collision Energy (GeV): </label>
-      <input
-        type="number"
-        id="energy-input"
-        min="10"
-        max="14000"
-        step="10"
-        value="13000"
-        aria-describedby="energy-desc"
-      />
-      <span id="energy-desc">Typical LHC proton collision energy</span>
-      <button id="simulate-btn">Simulate Collision</button>
-      <button id="nerd-mode-toggle">Nerd Mode</button>
-    </section>
+    <main class="app-container">
+        <section class="control-panel">
+            <div class="panel-section">
+                <h2>Data Input</h2>
+                <div class="input-group">
+                    <label for="data-source">Data Source:</label>
+                    <select id="data-source">
+                        <option value="sample">Sample Data</option>
+                        <option value="upload">Upload CSV/JSON</option>
+                        <option value="api">CMS Open Data API</option>
+                    </select>
+                </div>
+                <div id="file-upload-container" class="hidden">
+                    <input type="file" id="data-file" accept=".csv,.json">
+                    <button id="parse-data">Parse Data</button>
+                </div>
+                <div class="data-stats">
+                    <h3>Dataset Statistics</h3>
+                    <div id="data-stats-container"></div>
+                </div>
+            </div>
 
-    <section id="detector-viewport-wrapper" aria-label="Particle Detector View">
-      <h2>Detector View</h2>
-      <div id="detector-viewport" class="detector-container" role="img" aria-live="polite" aria-label="Particle tracks in detector"></div>
-    </section>
+            <div class="panel-section">
+                <h2>GAN Configuration</h2>
+                <div class="input-group">
+                    <label for="training-epochs">Training Epochs:</label>
+                    <input type="number" id="training-epochs" min="1" max="1000" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="batch-size">Batch Size:</label>
+                    <input type="number" id="batch-size" min="1" max="256" value="32">
+                </div>
+                <div class="input-group">
+                    <label for="learning-rate">Learning Rate:</label>
+                    <input type="number" id="learning-rate" min="0.0001" max="0.1" step="0.0001" value="0.001">
+                </div>
+                <div class="input-group">
+                    <label for="latent-dim">Latent Dimension:</label>
+                    <input type="number" id="latent-dim" min="1" max="256" value="64">
+                </div>
+                <button id="train-gan" class="primary-button">Train QuantumGAN</button>
+                <button id="generate-events" class="secondary-button" disabled>Generate New Events</button>
+            </div>
 
-    <section id="particle-cards" aria-live="polite" aria-label="Generated Particle Data"></section>
+            <div class="panel-section physics-constraints">
+                <h2>Physics Constraints</h2>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="momentum-conservation" checked>
+                    <label for="momentum-conservation">Momentum Conservation</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="energy-conservation" checked>
+                    <label for="energy-conservation">Energy Conservation</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="invariant-mass" checked>
+                    <label for="invariant-mass">Invariant Mass Validation</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="particle-types" checked>
+                    <label for="particle-types">Valid Particle Types</label>
+                </div>
+            </div>
+        </section>
 
-    <section id="console-log" aria-live="polite" aria-label="Physics feedback console" tabindex="0" style="background:#111; color:#0f0; font-family: monospace; padding: 1rem; margin-top: 2rem; border-radius: 8px; max-height: 200px; overflow-y: auto;">
-      <div id="console-messages"></div>
-    </section>
-  </main>
+        <section class="visualization-area">
+            <div class="visualization-tabs">
+                <button class="tab-button active" data-tab="input-data">Input Data</button>
+                <button class="tab-button" data-tab="generated-data">Generated Data</button>
+                <button class="tab-button" data-tab="physics-validation">Physics Validation</button>
+                <button class="tab-button" data-tab="gan-training">GAN Training</button>
+            </div>
 
-  <footer>
-    &copy; 2025 QuantumGAN · Open-source physics simulation project
-  </footer>
+            <div class="tab-content active" id="input-data">
+                <div class="chart-container">
+                    <canvas id="input-distribution-chart"></canvas>
+                </div>
+                <div class="event-display" id="input-event-display"></div>
+            </div>
 
-  <script type="module">
-    import { generateCollisionEvent } from './script.js';
-    import { computeInvariantMass, checkMomentumConservation, getParticleTypeDistribution } from './analytics.js';
-    import { getEtaPhiScatterData, detectUnphysicalResults, drawDetectorShells } from './statsEngine.js';
-    import './eastereggs.js';
+            <div class="tab-content" id="generated-data">
+                <div class="chart-container">
+                    <canvas id="generated-distribution-chart"></canvas>
+                </div>
+                <div class="event-display" id="generated-event-display"></div>
+                <button id="save-generated-data" class="secondary-button">Save Generated Events</button>
+            </div>
 
-    const energyInput = document.getElementById('energy-input');
-    const simulateBtn = document.getElementById('simulate-btn');
-    const detectorViewport = document.getElementById('detector-viewport');
-    const particleCards = document.getElementById('particle-cards');
-    const consoleMessages = document.getElementById('console-messages');
-    const themeToggle = document.getElementById('theme-toggle');
-    const nerdModeBtn = document.getElementById('nerd-mode-toggle');
+            <div class="tab-content" id="physics-validation">
+                <div class="validation-metrics">
+                    <div class="metric-card">
+                        <h3>Momentum Conservation</h3>
+                        <div class="metric-value" id="momentum-metric">-</div>
+                        <div class="metric-description">Δp/p<sub>initial</sub></div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Energy Conservation</h3>
+                        <div class="metric-value" id="energy-metric">-</div>
+                        <div class="metric-description">ΔE/E<sub>initial</sub></div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Invariant Mass</h3>
+                        <div class="metric-value" id="mass-metric">-</div>
+                        <div class="metric-description">Mean deviation</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="validation-chart"></canvas>
+                </div>
+            </div>
 
-    let particles = [];
-    let nerdMode = false;
+            <div class="tab-content" id="gan-training">
+                <div class="training-progress">
+                    <h3>Training Progress</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="training-progress-bar"></div>
+                        <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                    <div class="epoch-info" id="epoch-info">Epoch: 0/100</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="loss-chart"></canvas>
+                </div>
+                <div class="gan-metrics">
+                    <div class="metric-card">
+                        <h3>Generator Loss</h3>
+                        <div class="metric-value" id="generator-loss">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Discriminator Loss</h3>
+                        <div class="metric-value" id="discriminator-loss">-</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    // Colors by particle type
-    const particleColors = {
-      quark: '#ff4136',
-      lepton: '#2ecc40',
-      gluon: '#0074d9',
-      boson: '#ff851b',
-      default: '#aaa'
-    };
+    <footer class="app-footer">
+        <p>QuantumGAN - An open-source project for simulating LHC collisions using GANs</p>
+        <p>Compatible with CMS Open Data | Physics-aware constraints | Browser-based implementation</p>
+    </footer>
 
-    function logMessage(msg) {
-      const p = document.createElement('div');
-      p.textContent = msg;
-      consoleMessages.appendChild(p);
-      consoleMessages.scrollTop = consoleMessages.scrollHeight;
-    }
-
-    function clearLog() {
-      consoleMessages.innerHTML = '';
-    }
-
-    function clearDetector() {
-      detectorViewport.innerHTML = '';
-    }
-
-    function renderDetectorParticles(particles) {
-      clearDetector();
-
-      // Draw shell rings
-      drawDetectorShells(detectorViewport, 4);
-
-      const radius = detectorViewport.clientWidth / 2 - 20;
-
-      particles.forEach((p, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'particle-dot';
-        dot.textContent = p.label;
-
-        const color = particleColors[p.type] || particleColors.default;
-        dot.style.backgroundColor = color;
-
-        // Position by polar coordinates (phi, scaled radius by pT)
-        const phiRad = (p.phi * Math.PI) / 180;
-
-        // Bounce animation - random speed and direction
-        const speed = 0.5 + Math.random();
-        const direction = (performance.now() / 1000 + i) * speed;
-
-        // Calculate initial polar coords
-        let r = (p.pT / 50) * radius;
-        if (r > radius) r = radius;
-
-        const offsetR = r + 10 * Math.sin(direction * 5);
-
-        const x = radius + offsetR * Math.cos(phiRad);
-        const y = radius + offsetR * Math.sin(phiRad);
-
-        dot.style.left = `${x}px`;
-        dot.style.top = `${y}px`;
-
-        detectorViewport.appendChild(dot);
-
-        // Animate bouncing continuously with requestAnimationFrame
-        function animate() {
-          const t = performance.now() / 1000;
-          const offset = r + 10 * Math.sin(direction + t * 5);
-          const nx = radius + offset * Math.cos(phiRad);
-          const ny = radius + offset * Math.sin(phiRad);
-          dot.style.left = `${nx}px`;
-          dot.style.top = `${ny}px`;
-          requestAnimationFrame(animate);
-        }
-        animate();
-      });
-    }
-
-    function renderParticleCards(particles) {
-      particleCards.innerHTML = '';
-      particles.forEach((p) => {
-        const card = document.createElement('article');
-        card.className = 'particle-card';
-        card.innerHTML = `
-          <strong>${p.label} (${p.type})</strong><br>
-          pT: ${p.pT} GeV<br>
-          η: ${p.eta}<br>
-          φ: ${p.phi}°<br>
-          Energy: ${p.energy} GeV
-          ${nerdMode ? `<br><small>4-vector &eta;φ data visible in Nerd Mode</small>` : ''}
-        `;
-        particleCards.appendChild(card);
-      });
-    }
-
-    function updatePhysicsFeedback(particles) {
-      clearLog();
-      const mass = computeInvariantMass(particles);
-      const momentumOk = checkMomentumConservation(particles);
-      const dist = getParticleTypeDistribution(particles);
-      const unphysicalFlags = detectUnphysicalResults(particles);
-
-      logMessage(`Invariant mass: ${isNaN(mass) ? 'Non-physical' : mass.toFixed(3)} GeV/c²`);
-      logMessage(`Momentum conservation: ${momentumOk ? '✔️ conserved' : '❌ violated'}`);
-      logMessage('Particle distribution: ' + JSON.stringify(dist));
-      if (unphysicalFlags.length) {
-        unphysicalFlags.forEach(flag => logMessage(flag));
-      }
-    }
-
-    simulateBtn.addEventListener('click', () => {
-      const energy = Number(energyInput.value);
-      if (!energy || energy < 10) {
-        alert('Please enter a valid collision energy ≥ 10 GeV');
-        return;
-      }
-      particles = generateCollisionEvent(energy);
-      renderDetectorParticles(particles);
-      renderParticleCards(particles);
-      updatePhysicsFeedback(particles);
-    });
-
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-    });
-
-    nerdModeBtn.addEventListener('click', () => {
-      nerdMode = !nerdMode;
-      nerdModeBtn.textContent = nerdMode ? 'Nerd Mode: ON' : 'Nerd Mode: OFF';
-      renderParticleCards(particles);
-    });
-
-    // Initial setup
-    document.body.classList.add('dark'); // start dark by default
-    themeToggle.textContent = '☀️';
-
-    // Auto simulate on load
-    simulateBtn.click();
-  </script>
+    <script src="physics.js"></script>
+    <script src="gan.js"></script>
+    <script src="visualization.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
